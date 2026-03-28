@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Burst House — Creative Investment Marketplace</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#080808;--surface:#111111;--card:#181818;--card-hover:#222222;
+      --border:#282828;--text:#ffffff;--muted:#888888;--dim:#444444;
+      --accent:#E84523;--accent-hover:#ff5533;--green:#1ed760;--orange:#f59e0b;
+    }
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    .hidden{display:none!important}
+    .fade-in{animation:fadeIn .35s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ──────────────── SHARED ──────────────────────────────────────── */
+    .logo{font-size:19px;font-weight:900;letter-spacing:-0.5px;color:var(--text);text-decoration:none;cursor:pointer}
+    .logo span{color:var(--accent)}
+    .btn-ghost{background:none;border:none;color:var(--muted);font-size:14px;font-weight:500;cursor:pointer;padding:8px 16px;border-radius:6px;transition:color .2s;font-family:inherit}
+    .btn-ghost:hover{color:var(--text)}
+    .btn-primary{background:var(--accent);border:none;color:#fff;font-size:14px;font-weight:600;cursor:pointer;padding:10px 20px;border-radius:6px;transition:all .2s;font-family:inherit}
+    .btn-primary:hover{background:var(--accent-hover);transform:translateY(-1px)}
+
+    /* ──────────────── LANDING ──────────────────────────────────────── */
+    #landing{min-height:100vh;display:flex;flex-direction:column}
+
+    .landing-nav{display:flex;align-items:center;justify-content:space-between;padding:22px 56px;position:sticky;top:0;background:rgba(8,8,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:100}
+    .landing-nav-right{display:flex;align-items:center;gap:12px}
+
+    .landing-hero{flex:1;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:64px 56px 48px;gap:48px;max-width:1280px;margin:0 auto;width:100%}
+
+    .hero-text h1{font-size:60px;font-weight:900;line-height:1.04;letter-spacing:-2.5px}
+    .hero-text h1.accent-line{color:var(--accent)}
+    .hero-sub{margin-top:22px;font-size:17px;color:var(--muted);line-height:1.65;max-width:420px}
+    .hero-ctas{margin-top:36px;display:flex;gap:14px}
+
+    .btn-lg{padding:15px 30px;font-size:15px;font-weight:700;border-radius:8px;cursor:pointer;transition:all .2s;border:none;font-family:inherit}
+    .btn-lg.solid{background:var(--accent);color:#fff}
+    .btn-lg.solid:hover{background:var(--accent-hover);transform:translateY(-2px);box-shadow:0 10px 28px rgba(232,69,35,.4)}
+    .btn-lg.ghost{background:transparent;color:var(--text);border:1.5px solid var(--border)}
+    .btn-lg.ghost:hover{border-color:rgba(255,255,255,.4);transform:translateY(-2px)}
+
+    /* Floating preview cards */
+    .hero-cards{position:relative;height:500px}
+    .preview-card{position:absolute;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;width:255px;box-shadow:0 28px 56px rgba(0,0,0,.7)}
+
+    .preview-card:nth-child(1){top:16px;right:32px;transform:rotate(2.5deg);z-index:3;animation:float1 4.2s ease-in-out infinite}
+    .preview-card:nth-child(2){top:210px;right:0;transform:rotate(-2deg);z-index:2;animation:float2 5.1s ease-in-out infinite .6s}
+    .preview-card:nth-child(3){top:88px;right:220px;transform:rotate(-1deg);z-index:1;opacity:.45;animation:float3 3.8s ease-in-out infinite 1.2s}
+
+    @keyframes float1{0%,100%{transform:rotate(2.5deg) translateY(0)}50%{transform:rotate(2.5deg) translateY(-9px)}}
+    @keyframes float2{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(-2deg) translateY(-7px)}}
+    @keyframes float3{0%,100%{transform:rotate(-1deg) translateY(0)}50%{transform:rotate(-1deg) translateY(-11px)}}
+
+    .card-thumb{width:100%;height:112px;border-radius:10px;margin-bottom:13px;display:flex;align-items:center;justify-content:center;font-size:38px}
+    .badge{display:inline-block;padding:3px 7px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+    .badge-music{background:rgba(139,92,246,.2);color:#a78bfa}
+    .badge-film{background:rgba(20,184,166,.2);color:#2dd4bf}
+    .badge-fashion{background:rgba(244,114,182,.2);color:#f472b6}
+    .badge-photo{background:rgba(59,130,246,.2);color:#60a5fa}
+    .badge-visual{background:rgba(249,115,22,.2);color:#fb923c}
+    .badge-content{background:rgba(34,197,94,.2);color:#4ade80}
+
+    .card-cat{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+    .card-title{font-size:14px;font-weight:700;margin-bottom:3px}
+    .card-creator{font-size:12px;color:var(--muted);margin-bottom:12px}
+    .card-hr{height:1px;background:var(--border);margin-bottom:12px}
+    .card-amount{font-size:19px;font-weight:800;margin-bottom:2px}
+    .card-return{font-size:11px;color:var(--muted);margin-bottom:10px}
+    .status{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600}
+    .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .status-open{color:var(--green)}.status-open .dot{background:var(--green)}
+    .status-partial{color:var(--orange)}.status-partial .dot{background:var(--orange)}
+
+    /* Stats bar */
+    .stats-bar{background:var(--surface);border-top:1px solid var(--border);padding:22px 56px;display:flex;align-items:center;justify-content:center;gap:56px}
+    .stat-num{font-size:26px;font-weight:800;letter-spacing:-1px}
+    .stat-lbl{font-size:12px;color:var(--muted);margin-top:3px}
+    .stat-div{width:1px;height:36px;background:var(--border)}
+
+    /* ──────────────── AUTH MODAL ──────────────────────────── */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(5px);z-index:300;display:flex;align-items:center;justify-content:center}
+    .modal{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:40px;width:400px;position:relative}
+    .modal-x{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;font-family:inherit;line-height:1}
+    .modal-x:hover{color:var(--text)}
+    .modal h2{font-size:26px;font-weight:900;margin-bottom:5px}
+    .modal .modal-sub{font-size:14px;color:var(--muted);margin-bottom:28px}
+    .choice-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+    .choice-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:14px 12px;cursor:pointer;text-align:left;transition:all .15s;font-family:inherit}
+    .choice-btn:hover,.choice-btn.selected{border-color:var(--accent);background:rgba(232,69,35,.08)}
+    .choice-btn .choice-icon{font-size:22px;margin-bottom:8px}
+    .choice-btn .choice-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+    .choice-btn .choice-sub{font-size:11px;color:var(--muted)}
+    .form-field{margin-bottom:14px}
+    .form-field label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+    .form-field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 13px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .15s}
+    .form-field input:focus{border-color:var(--accent)}
+    .btn-full{width:100%;padding:13px;font-size:15px;font-weight:700;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:background .2s;margin-top:4px}
+    .btn-full:hover{background:var(--accent-hover)}
+    .modal-foot{margin-top:18px;text-align:center;font-size:13px;color:var(--muted)}
+    .modal-foot a{color:var(--accent);cursor:pointer;text-decoration:none}
+
+    /* ──────────────── PLATFORM NAV ───────────────────────── */
+    #platform{min-height:100vh;display:flex;flex-direction:column}
+    .p-nav{display:flex;align-items:center;padding:0 32px;height:62px;background:rgba(8,8,8,.98);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;gap:8px}
+    .p-nav .logo{margin-right:20px}
+    .nav-link{background:none;border:none;color:var(--muted);font-size:14px;font-weight:500;padding:7px 13px;border-radius:6px;cursor:pointer;transition:all .15s;font-family:inherit}
+    .nav-link:hover,.nav-link.active{color:var(--text);background:rgba(255,255,255,.07)}
+    .p-nav-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+    .search{display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px;width:200px}
+    .search input{background:none;border:none;outline:none;color:var(--text);font-size:13px;font-family:inherit;width:100%}
+    .search input::placeholder{color:var(--dim)}
+    .btn-sub{background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:600;padding:7px 15px;border-radius:6px;cursor:pointer;font-family:inherit;transition:background .2s;white-space:nowrap}
+    .btn-sub:hover{background:var(--accent-hover)}
+    .avatar{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
+
+    /* ──────────────── PLATFORM CONTENT ────────────────────── */
+    .p-content{flex:1;padding:32px;max-width:1200px;margin:0 auto;width:100%}
+    .sec-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+
+    /* Featured */
+    .featured-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:grid;grid-template-columns:260px 1fr;min-height:210px;transition:border-color .2s;cursor:pointer;margin-bottom:40px}
+    .featured-card:hover{border-color:rgba(232,69,35,.45)}
+    .feat-img{display:flex;align-items:center;justify-content:center;font-size:72px;position:relative}
+    .feat-img::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,0,0,.25))}
+    .feat-body{padding:28px;display:flex;flex-direction:column;justify-content:space-between}
+    .feat-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(232,69,35,.15);color:var(--accent);font-size:10px;font-weight:700;padding:4px 9px;border-radius:4px;width:fit-content;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+    .feat-title{font-size:26px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px}
+    .feat-creator{font-size:13px;color:var(--muted);margin-bottom:18px}
+    .feat-meta{display:flex;gap:28px;margin-bottom:18px}
+    .meta-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+    .meta-val{font-size:17px;font-weight:700}
+    .prog-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:5px}
+    .prog-fill{height:100%;background:var(--accent);border-radius:2px}
+    .prog-txt{font-size:11px;color:var(--muted)}
+    .btn-invest{background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:700;padding:11px 22px;border-radius:7px;cursor:pointer;font-family:inherit;transition:all .2s;display:inline-flex;align-items:center;gap:6px;width:fit-content}
+    .btn-invest:hover{background:var(--accent-hover);transform:translateY(-1px)}
+
+    /* Filter tabs */
+    .filter-row{display:flex;gap:7px;align-items:center;margin-bottom:22px;flex-wrap:wrap}
+    .ftab{background:none;border:1px solid var(--border);color:var(--muted);font-size:13px;font-weight:500;padding:6px 15px;border-radius:20px;cursor:pointer;font-family:inherit;transition:all .15s}
+    .ftab:hover{border-color:rgba(255,255,255,.3);color:var(--text)}
+    .ftab.active{background:var(--text);border-color:var(--text);color:var(--bg);font-weight:600}
+
+    /* Project grid */
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:48px}
+    .proj-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
+    .proj-card:hover{background:var(--card-hover);border-color:rgba(255,255,255,.14);transform:translateY(-3px);box-shadow:0 18px 36px rgba(0,0,0,.6)}
+    .proj-img{width:100%;height:150px;display:flex;align-items:center;justify-content:center;font-size:44px}
+    .proj-body{padding:15px}
+    .proj-cat{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:5px}
+    .proj-title{font-size:14px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .proj-creator{font-size:12px;color:var(--muted);margin-bottom:12px}
+    .proj-hr{height:1px;background:var(--border);margin-bottom:12px}
+    .proj-amount{font-size:18px;font-weight:800;margin-bottom:2px}
+    .proj-return{font-size:11px;color:var(--muted);margin-bottom:10px}
+    .proj-foot{display:flex;align-items:center;justify-content:space-between}
+    .invest-pill{background:var(--accent);border:none;color:#fff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:5px;cursor:pointer;font-family:inherit;opacity:0;transition:opacity .15s}
+    .proj-card:hover .invest-pill{opacity:1}
+
+    /* Events section */
+    .events-sep{padding-top:20px;border-top:1px solid var(--border)}
+    .events-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .ev-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;cursor:pointer;transition:all .2s;display:flex;gap:18px;align-items:flex-start}
+    .ev-card:hover{border-color:rgba(255,255,255,.13);background:var(--card-hover)}
+    .ev-date{border-radius:9px;padding:10px;text-align:center;min-width:52px;flex-shrink:0}
+    .ev-mon{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+    .ev-num{font-size:24px;font-weight:900;line-height:1;margin-top:2px}
+    .ev-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);margin-bottom:6px}
+    .ev-name{font-size:16px;font-weight:700;margin-bottom:5px}
+    .ev-meta{font-size:12px;color:var(--muted);line-height:1.5}
+    .ev-btns{display:flex;gap:7px;margin-top:12px}
+    .ev-btn{font-size:11px;font-weight:600;padding:6px 13px;border-radius:6px;cursor:pointer;font-family:inherit;transition:all .15s}
+    .ev-btn.solid{background:var(--text);color:var(--bg);border:none}
+    .ev-btn.solid:hover{opacity:.88}
+    .ev-btn.outline{background:none;color:var(--text);border:1px solid var(--border)}
+    .ev-btn.outline:hover{border-color:rgba(255,255,255,.35)}
+
+    /* Submit modal */
+    .smodal{width:440px;max-height:82vh;overflow-y:auto}
+    .smodal::-webkit-scrollbar{width:4px}
+    .smodal::-webkit-scrollbar-track{background:transparent}
+    .smodal::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+    .form-field select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 13px;color:var(--text);font-size:14px;font-family:inherit;outline:none}
+    .form-field select option{background:var(--card)}
+
+    /* Brands page */
+    .brands-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:40px}
+    .brand-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:26px}
+    .brand-icon{font-size:26px;margin-bottom:11px}
+    .brand-title{font-size:15px;font-weight:700;margin-bottom:7px}
+    .brand-desc{font-size:13px;color:var(--muted);line-height:1.6}
+    .case-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:36px;margin-bottom:40px}
+
+    /* Events full page */
+    .ev-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:40px}
+    .ev-stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;text-align:center}
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════════
+     AUTH MODAL
+═══════════════════════════════════════════════════════════════════════════════ -->
+<div class="overlay hidden" id="authModal">
+  <div class="modal fade-in">
+    <button class="modal-x" onclick="closeAuth()">✕</button>
+    <h2>Join Burst House</h2>
+    <p class="modal-sub">Create your account to access the marketplace.</p>
+
+    <div class="choice-row">
+      <button class="choice-btn selected" id="choiceInvestor" onclick="pickRole('investor')">
+        <div class="choice-icon">💰</div>
+        <div class="choice-title">I'm an Investor</div>
+        <div class="choice-sub">I want to fund creative projects</div>
+      </button>
+      <button class="choice-btn" id="choiceCreative" onclick="pickRole('creative')">
+        <div class="choice-icon">🎨</div>
+        <div class="choice-title">I'm a Creative</div>
+        <div class="choice-sub">I want my project funded</div>
+      </button>
+    </div>
+
+    <div class="form-field">
+      <label>Full Name</label>
+      <input type="text" id="authName" placeholder="Your name">
+    </div>
+    <div class="form-field">
+      <label>Email</label>
+      <input type="email" placeholder="you@email.com">
+    </div>
+    <button class="btn-full" onclick="enterPlatform()">Enter the Marketplace →</button>
+    <div class="modal-foot">Already have an account? <a onclick="enterPlatform()">Sign in</a></div>
+  </div>
+</div>
+
+<!-- Submit project modal -->
+<div class="overlay hidden" id="submitModal">
+  <div class="modal smodal fade-in">
+    <button class="modal-x" onclick="closeSubmit()">✕</button>
+    <h2>Submit Your Project</h2>
+    <p class="modal-sub">Tell us what you're making. We review every application within 7 days.</p>
+    <div class="form-field"><label>Project Title</label><input type="text" placeholder="What's this project called?"></div>
+    <div class="form-field"><label>Project Type</label>
+      <select>
+        <option>Music — EP / Album / Single</option>
+        <option>Film / Short Film / Documentary</option>
+        <option>Visual Art / Exhibition</option>
+        <option>Fashion / Collection</option>
+        <option>Photography Project</option>
+        <option>Content Series / Campaign</option>
+      </select>
+    </div>
+    <div class="form-field"><label>Amount Needed (₦)</label><input type="text" placeholder="e.g. ₦500,000"></div>
+    <div class="form-field"><label>Budget Breakdown</label><input type="text" placeholder="Studio, video, marketing, etc."></div>
+    <div class="form-field"><label>Instagram / Portfolio Link</label><input type="text" placeholder="Link to your work"></div>
+    <button class="btn-full" onclick="closeSubmit()">Submit Application →</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════════
+     LANDING / AUTH GATE
+═══════════════════════════════════════════════════════════════════════════════ -->
+<div id="landing">
+
+  <nav class="landing-nav">
+    <span class="logo">BURST<span>HOUSE</span></span>
+    <div class="landing-nav-right">
+      <button class="btn-ghost" onclick="openAuth()">Sign in</button>
+      <button class="btn-primary" onclick="openAuth()">Join free →</button>
+    </div>
+  </nav>
+
+  <div class="landing-hero">
+
+    <!-- LEFT: headline + CTAs -->
+    <div class="hero-text">
+      <h1>Invest in creative<br>projects.</h1>
+      <h1 class="accent-line">Get your creative<br>project funded.</h1>
+      <p class="hero-sub">Browse vetted projects. Commit your investment. Burst House manages every cent.</p>
+      <div class="hero-ctas">
+        <button class="btn-lg solid" onclick="openAuth()">Browse Projects →</button>
+        <button class="btn-lg ghost" onclick="openAuth()">Submit Your Project</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: floating preview cards -->
+    <div class="hero-cards">
+
+      <!-- Card 1 — Music -->
+      <div class="preview-card">
+        <div class="card-thumb" style="background:linear-gradient(135deg,#1e1b4b,#4c1d95)">🎵</div>
+        <div class="card-cat"><span class="badge badge-music">Music</span> EP · 6 tracks</div>
+        <div class="card-title">Lekan's Debut EP</div>
+        <div class="card-creator">Lekan · Abuja</div>
+        <div class="card-hr"></div>
+        <div class="card-amount">₦480,000</div>
+        <div class="card-return">15% revenue share · 24 months</div>
+        <div class="status status-open"><div class="dot"></div> Open for investment</div>
+      </div>
+
+      <!-- Card 2 — Film -->
+      <div class="preview-card">
+        <div class="card-thumb" style="background:linear-gradient(135deg,#022c22,#065f46)">🎬</div>
+        <div class="card-cat"><span class="badge badge-film">Film</span> Documentary</div>
+        <div class="card-title">Unseen Stories</div>
+        <div class="card-creator">Adaeze · Lagos</div>
+        <div class="card-hr"></div>
+        <div class="card-amount">₦750,000</div>
+        <div class="card-return">Brand visibility · content rights</div>
+        <div class="status status-partial"><div class="dot"></div> 40% funded</div>
+      </div>
+
+      <!-- Card 3 — Fashion (faded bg) -->
+      <div class="preview-card">
+        <div class="card-thumb" style="background:linear-gradient(135deg,#4a044e,#86198f)">👗</div>
+        <div class="card-cat"><span class="badge badge-fashion">Fashion</span> Collection</div>
+        <div class="card-title">SS26 Collection</div>
+        <div class="card-creator">Tobi · Lagos</div>
+        <div class="card-hr"></div>
+        <div class="card-amount">₦1,200,000</div>
+        <div class="card-return">20% revenue share · 18 months</div>
+        <div class="status status-open"><div class="dot"></div> Open for investment</div>
+      </div>
+
+    </div><!-- /hero-cards -->
+  </div><!-- /landing-hero -->
+
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <div><div class="stat-num" style="color:var(--accent)">5+</div><div class="stat-lbl">Events run</div></div>
+    <div class="stat-div"></div>
+    <div><div class="stat-num">3,000+</div><div class="stat-lbl">Attendees per event</div></div>
+    <div class="stat-div"></div>
+    <div><div class="stat-num">₦500K+</div><div class="stat-lbl">Brand deals secured</div></div>
+    <div class="stat-div"></div>
+    <div><div class="stat-num">800+</div><div class="stat-lbl">Orders generated for one partner in a single week</div></div>
+  </div>
+
+</div><!-- /landing -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════════
+     PLATFORM
+═══════════════════════════════════════════════════════════════════════════════ -->
+<div id="platform" class="hidden">
+
+  <!-- Platform nav -->
+  <nav class="p-nav">
+    <span class="logo" onclick="setView('marketplace')">BURST<span>HOUSE</span></span>
+    <button class="nav-link active" id="nl-marketplace" onclick="setView('marketplace')">Browse</button>
+    <button class="nav-link" id="nl-events" onclick="setView('events')">Events</button>
+    <button class="nav-link" id="nl-brands" onclick="setView('brands')">For Brands</button>
+
+    <div class="p-nav-right">
+      <div class="search">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search projects...">
+      </div>
+      <button class="btn-sub" onclick="openSubmit()">+ Submit Project</button>
+      <div class="avatar" id="userAvatar">A</div>
+    </div>
+  </nav>
+
+  <div class="p-content">
+
+    <!-- ─────── MARKETPLACE VIEW ─────── -->
+    <div id="marketplace-view" class="fade-in">
+
+      <!-- Featured -->
+      <div class="sec-label">⭐ Featured Project</div>
+      <div class="featured-card">
+        <div class="feat-img" style="background:linear-gradient(135deg,#1a0a2e 0%,#4c1d95 60%,#1a0a2e 100%)">
+          <span style="position:relative;z-index:1">🎵</span>
+        </div>
+        <div class="feat-body">
+          <div>
+            <div class="feat-tag">🟢 Open for investment</div>
+            <div class="feat-title">Lekan's Debut EP</div>
+            <div class="feat-creator">Lekan · Music · Abuja · 6 tracks</div>
+            <div class="feat-meta">
+              <div><div class="meta-lbl">Amount needed</div><div class="meta-val">₦480,000</div></div>
+              <div><div class="meta-lbl">Return</div><div class="meta-val">15% rev share</div></div>
+              <div><div class="meta-lbl">Timeline</div><div class="meta-val">24 months</div></div>
+            </div>
+            <div class="prog-bar" style="max-width:300px"><div class="prog-fill" style="width:25%"></div></div>
+            <div class="prog-txt">₦120,000 raised · 25% funded</div>
+          </div>
+          <button class="btn-invest">Invest in This Project →</button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-row">
+        <button class="ftab active" onclick="filter('all',this)">All Projects</button>
+        <button class="ftab" onclick="filter('music',this)">🎵 Music</button>
+        <button class="ftab" onclick="filter('film',this)">🎬 Film</button>
+        <button class="ftab" onclick="filter('fashion',this)">👗 Fashion</button>
+        <button class="ftab" onclick="filter('visual',this)">🎨 Visual Art</button>
+        <button class="ftab" onclick="filter('photo',this)">📸 Photography</button>
+      </div>
+
+      <!-- Grid label -->
+      <div class="sec-label">Open for Investment</div>
+
+      <!-- Project cards -->
+      <div class="grid3" id="projGrid">
+
+        <div class="proj-card" data-cat="music">
+          <div class="proj-img" style="background:linear-gradient(135deg,#1e1b4b,#4c1d95)">🎵</div>
+          <div class="proj-body">
+            <div class="proj-cat"><span class="badge badge-music">Music</span> EP · 6 Tracks</div>
+            <div class="proj-title">Lekan's Debut EP</div>
+            <div class="proj-creator">Lekan · Abuja</div>
+            <div class="proj-hr"></div>
+            <div class="proj-amount">₦480,000</div>
+            <div class="proj-return">15% revenue share · 24 months</div>
+            <div class="proj-foot">
+              <div class="status status-open"><div class="dot"></div> Open</div>
+              <button class="invest-pill">Invest →</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="proj-card" data-cat="film">
+          <div class="proj-img" style="background:linear-gradient(135deg,#022c22,#065f46)">🎬</div>
+          <div class="proj-body">
+            <div class="proj-cat"><span class="badge badge-film">Film</span> Documentary</div>
+            <div class="proj-title">Unseen Stories</div>
+            <div class="proj-creator">Adaeze · Lagos</div>
+            <div class="proj-hr"></div>
+            <div class="proj-amount">₦750,000</div>
+            <div class="proj-return">Brand visibility · content rights</div>
+            <div class="proj-foot">
+              <div class="status status-partial"><div class="dot"></div> 40% funded</div>
+              <button class="invest-pill">Invest →</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="proj-card" data-cat="fashion">
+          <div class="proj-img" style="background:linear-gradient(135deg,#4a044e,#86198f)">👗</div>
+          <div class="proj-body">
+            <div class="proj-cat"><span class="badge badge-fashion">Fashion</span> Collection</div>
+            <div class="proj-title">SS26 Collection</div>
+            <div class="proj-creator">Tobi · Lagos</div>
+            <div class="proj-hr"></div>
+            <div class="proj-amount">₦1,200,000</div>
+            <div class="proj-return">20% revenue share · 18 months</div>
+            <div class="proj-foot">
+              <div class="status status-open"><div class="dot"></div> Open</div>
+              <button class="invest-pill">Invest →</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="proj-card" data-cat="photo">
+          <div class="proj-img" style="background:linear-gradient(135deg,#0c1445,#1e3a8a)">📸</div>
+          <div class="proj-body">
+            <div class="proj-cat"><span class="badge badge-photo">Photography</span> Exhibition</div>
+            <div class="proj-title">Faces of the City</div>
+            <div class="proj-creator">Chioma · Port Harcourt</div>
+            <div class="proj-hr"></div>
+            <div class="proj-amount">₦320,000</div>
+            <div class="proj-return">12% revenue share · 12 months</div>
+            <div class="proj-foot">
+              <div class="status status-open"><div class="dot"></div> Open</div>
+              <button class="invest-pill">Invest →</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="proj-card" data-cat="visual">
+          <div class="proj-img" style="background:linear-gradient(135deg,#431407,#9a3412)">🎨</div>
+          <div class="proj-body">
+            <div class="proj-cat"><span class="badge badge-visual">Visual Art</span> Series</div>
+            <div class="proj-title">Afro Futures</div>
+            <div class="proj-creator">Ola · Abuja</div>
+            <div class="proj-hr"></div>
+            <div class="proj-amount">₦600,000</div>
+            <div class="proj-return">18% revenue share · 20 months</div>
+            <div class="proj-foot">
+              <div class="status status-partial"><div class="dot"></div> 60% funded</div>
+              <button class="invest-pill">Invest →</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="proj-card" data-cat="content">
+          <div class="proj-img" style="background:linear-gradient(135deg,#042f2e,#134e4a)">📱</div>
+          <div class="proj-body">
+            <div class="proj-cat"><span class="badge badge-content">Content</span> Campaign</div>
+            <div class="proj-title">The Culture Report</div>
+            <div class="proj-creator">Bode · Lagos</div>
+            <div class="proj-hr"></div>
+            <div class="proj-amount">₦400,000</div>
+            <div class="proj-return">Brand visibility · series rights</div>
+            <div class="proj-foot">
+              <div class="status status-open"><div class="dot"></div> Open</div>
+              <button class="invest-pill">Invest →</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /grid -->
+
+      <!-- Events subsection -->
+      <div class="events-sep">
+        <div class="events-hdr">
+          <div>
+            <div class="sec-label" style="margin-bottom:4px">🎪 Events</div>
+            <div style="font-size:20px;font-weight:800">Creative Fest</div>
+          </div>
+          <button class="btn-ghost" onclick="setView('events')" style="font-size:13px">View all events →</button>
+        </div>
+        <div class="grid2">
+          <div class="ev-card">
+            <div class="ev-date" style="background:var(--accent)">
+              <div class="ev-mon">TBC</div>
+              <div class="ev-num">005</div>
+            </div>
+            <div>
+              <div class="ev-tag">Upcoming · Abuja</div>
+              <div class="ev-name">Creative Fest 005</div>
+              <div class="ev-meta">Artists perform. Painters exhibit. Brands connect. 3,000+ people.</div>
+              <div class="ev-btns">
+                <button class="ev-btn solid">Apply to Perform</button>
+                <button class="ev-btn outline">Bring Your Brand</button>
+              </div>
+            </div>
+          </div>
+          <div class="ev-card" style="opacity:.55">
+            <div class="ev-date" style="background:#2a2a2a">
+              <div class="ev-mon">Dec</div>
+              <div class="ev-num">004</div>
+            </div>
+            <div>
+              <div class="ev-tag" style="color:var(--muted)">Past · Abuja</div>
+              <div class="ev-name">Creative Fest 004</div>
+              <div class="ev-meta">3,200+ attendees · 24 performers · 8 brand partners</div>
+              <div class="ev-btns">
+                <button class="ev-btn outline">See Photos</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /marketplace-view -->
+
+
+    <!-- ─────── EVENTS VIEW ─────── -->
+    <div id="events-view" class="hidden fade-in">
+      <div style="margin-bottom:32px">
+        <h1 style="font-size:42px;font-weight:900;letter-spacing:-1.5px">Creative Fest.</h1>
+        <p style="color:var(--muted);margin-top:8px;font-size:16px">Twice a year. One city. The most creative, culturally switched-on people in the room.</p>
+      </div>
+      <div class="ev-stat-row">
+        <div class="ev-stat"><div style="font-size:34px;font-weight:900;color:var(--accent)">3K+</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Attendees per event</div></div>
+        <div class="ev-stat"><div style="font-size:34px;font-weight:900">5</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Events completed</div></div>
+        <div class="ev-stat"><div style="font-size:34px;font-weight:900;color:var(--green)">₦0</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Cost to perform</div></div>
+      </div>
+      <div class="sec-label" style="margin-bottom:14px">Upcoming</div>
+      <div class="ev-card" style="max-width:580px;margin-bottom:40px">
+        <div class="ev-date" style="background:var(--accent)">
+          <div class="ev-mon">TBC</div><div class="ev-num">005</div>
+        </div>
+        <div>
+          <div class="ev-tag">Creative Fest 005 · Abuja</div>
+          <div class="ev-name" style="font-size:20px">The 5th Burst House Creative Fest</div>
+          <div class="ev-meta" style="margin-bottom:10px">Date to be announced. Applications open now for performers, artists, and brand partners.</div>
+          <div class="ev-btns">
+            <button class="ev-btn solid">Apply to Perform</button>
+            <button class="ev-btn outline">Sponsor the Fest</button>
+          </div>
+        </div>
+      </div>
+      <div class="sec-label" style="margin-bottom:14px">Past Events</div>
+      <div class="grid2">
+        <div class="ev-card" style="opacity:.65"><div class="ev-date" style="background:#2a2a2a"><div class="ev-mon">Dec</div><div class="ev-num">004</div></div><div><div class="ev-tag" style="color:var(--muted)">Abuja · Dec 2025</div><div class="ev-name">Creative Fest 004</div><div class="ev-meta">3,200 attendees · 24 performers · 8 brand activations</div><div class="ev-btns"><button class="ev-btn outline">View Gallery</button></div></div></div>
+        <div class="ev-card" style="opacity:.65"><div class="ev-date" style="background:#2a2a2a"><div class="ev-mon">Jan</div><div class="ev-num">003</div></div><div><div class="ev-tag" style="color:var(--muted)">Abuja · Jan 2025</div><div class="ev-name">Creative Fest 003</div><div class="ev-meta">2,800 attendees · 18 performers · 5 brand activations</div><div class="ev-btns"><button class="ev-btn outline">View Gallery</button></div></div></div>
+        <div class="ev-card" style="opacity:.65"><div class="ev-date" style="background:#2a2a2a"><div class="ev-mon">Aug</div><div class="ev-num">002</div></div><div><div class="ev-tag" style="color:var(--muted)">Abuja · Aug 2024</div><div class="ev-name">Creative Fest 002</div><div class="ev-meta">2,100 attendees · 14 performers · 4 brand activations</div><div class="ev-btns"><button class="ev-btn outline">View Gallery</button></div></div></div>
+        <div class="ev-card" style="opacity:.65"><div class="ev-date" style="background:#2a2a2a"><div class="ev-mon">Feb</div><div class="ev-num">001</div></div><div><div class="ev-tag" style="color:var(--muted)">Abuja · Feb 2024</div><div class="ev-name">Creative Fest 001</div><div class="ev-meta">1,500 attendees · 10 performers · The beginning.</div><div class="ev-btns"><button class="ev-btn outline">View Gallery</button></div></div></div>
+      </div>
+    </div><!-- /events-view -->
+
+
+    <!-- ─────── BRANDS VIEW ─────── -->
+    <div id="brands-view" class="hidden fade-in">
+      <div style="margin-bottom:32px">
+        <h1 style="font-size:42px;font-weight:900;letter-spacing:-1.5px;max-width:560px">Let your product reach the creative generation.</h1>
+        <p style="color:var(--muted);margin-top:10px;font-size:16px;max-width:520px;line-height:1.6">3,000+ engaged young creatives at every event. We build the activation that makes them trust — and buy — your product.</p>
+        <button class="btn-lg solid" style="margin-top:24px">Fill the Form — Let's Talk →</button>
+      </div>
+      <div class="brands-grid">
+        <div class="brand-card"><div class="brand-icon">🎪</div><div class="brand-title">Event Sponsorship</div><div class="brand-desc">Logo, stage presence, naming rights. Your brand in front of 3,000+ people who actually care.</div></div>
+        <div class="brand-card"><div class="brand-icon">📊</div><div class="brand-title">Marketing Solutions</div><div class="brand-desc">Tell us your objective. We research your industry and build a custom campaign around your product.</div></div>
+        <div class="brand-card"><div class="brand-icon">🤝</div><div class="brand-title">Brand Partnerships</div><div class="brand-desc">Long-term ambassador deals with our creatives. Content, reach, and trust. Commission-based.</div></div>
+      </div>
+      <div class="case-box">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent);margin-bottom:14px">Real Result</div>
+        <div style="font-size:38px;font-weight:900;letter-spacing:-1.5px;margin-bottom:18px;line-height:1.05">"800+ orders.<br>One week.<br>One event."</div>
+        <p style="font-size:15px;color:var(--muted);line-height:1.75;max-width:580px">A cake bakery came to us at our November event wanting more customers. We proposed a branded game stand — people tasted small pieces of cake and played a simple game to win more. After the event, she received 800+ orders in that week alone. A 300% increase. <strong style="color:var(--text)">People buy what they trust. We made them taste it first.</strong></p>
+      </div>
+      <div style="text-align:center;padding:48px 0">
+        <div style="font-size:22px;font-weight:800;margin-bottom:10px">Ready to get to work?</div>
+        <p style="color:var(--muted);margin-bottom:24px">Tell us about your brand. We'll build something that works.</p>
+        <button class="btn-lg solid">Fill The Form →</button>
+      </div>
+    </div><!-- /brands-view -->
+
+  </div><!-- /p-content -->
+</div><!-- /platform -->
+
+
+<script>
+  let currentRole = 'investor';
+
+  function openAuth() {
+    document.getElementById('authModal').classList.remove('hidden');
+  }
+  function closeAuth() {
+    document.getElementById('authModal').classList.add('hidden');
+  }
+  function pickRole(role) {
+    currentRole = role;
+    document.getElementById('choiceInvestor').classList.toggle('selected', role === 'investor');
+    document.getElementById('choiceCreative').classList.toggle('selected', role === 'creative');
+  }
+  function enterPlatform() {
+    const name = document.getElementById('authName').value.trim() || 'A';
+    document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+    closeAuth();
+    document.getElementById('landing').classList.add('hidden');
+    const p = document.getElementById('platform');
+    p.classList.remove('hidden');
+    p.classList.add('fade-in');
+  }
+
+  function setView(view) {
+    ['marketplace','events','brands'].forEach(v => {
+      document.getElementById(v+'-view').classList.add('hidden');
+      const nl = document.getElementById('nl-'+v);
+      if(nl) nl.classList.remove('active');
+    });
+    document.getElementById(view+'-view').classList.remove('hidden');
+    document.getElementById(view+'-view').classList.add('fade-in');
+    const nl = document.getElementById('nl-'+view);
+    if(nl) nl.classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function filter(cat, btn) {
+    document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.proj-card').forEach(c => {
+      c.style.display = (cat === 'all' || c.dataset.cat === cat) ? 'block' : 'none';
+    });
+  }
+
+  function openSubmit() {
+    document.getElementById('submitModal').classList.remove('hidden');
+  }
+  function closeSubmit() {
+    document.getElementById('submitModal').classList.add('hidden');
+  }
+
+  // Close on overlay click
+  ['authModal','submitModal'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function(e) {
+      if(e.target === this) this.classList.add('hidden');
+    });
+  });
+</script>
+
+</body>
+</html>
