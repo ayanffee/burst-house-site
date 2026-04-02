@@ -1,4 +1,4 @@
-<!-- v1 -->
+<!-- v2 — fully functional -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Burst House — Creative Investment Marketplace</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     :root{
@@ -18,7 +20,6 @@
     .fade-in{animation:fadeIn .35s ease}
     @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
-    /* ──────────────── SHARED ──────────────────────────────────────── */
     .logo{font-size:19px;font-weight:900;letter-spacing:-0.5px;color:var(--text);text-decoration:none;cursor:pointer}
     .logo span{color:var(--accent)}
     .btn-ghost{background:none;border:none;color:var(--muted);font-size:14px;font-weight:500;cursor:pointer;padding:8px 16px;border-radius:6px;transition:color .2s;font-family:inherit}
@@ -26,33 +27,26 @@
     .btn-primary{background:var(--accent);border:none;color:#fff;font-size:14px;font-weight:600;cursor:pointer;padding:10px 20px;border-radius:6px;transition:all .2s;font-family:inherit}
     .btn-primary:hover{background:var(--accent-hover);transform:translateY(-1px)}
 
-    /* ──────────────── LANDING ──────────────────────────────────────── */
+    /* LANDING */
     #landing{min-height:100vh;display:flex;flex-direction:column}
-
     .landing-nav{display:flex;align-items:center;justify-content:space-between;padding:22px 56px;position:sticky;top:0;background:rgba(8,8,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:100}
     .landing-nav-right{display:flex;align-items:center;gap:12px}
-
     .landing-hero{flex:1;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:64px 56px 48px;gap:48px;max-width:1280px;margin:0 auto;width:100%}
-
     .hero-text h1{font-size:60px;font-weight:900;line-height:1.04;letter-spacing:-2.5px}
     .hero-text h1.accent-line{color:var(--accent)}
     .hero-sub{margin-top:22px;font-size:17px;color:var(--muted);line-height:1.65;max-width:420px}
     .hero-ctas{margin-top:36px;display:flex;gap:14px}
-
     .btn-lg{padding:15px 30px;font-size:15px;font-weight:700;border-radius:8px;cursor:pointer;transition:all .2s;border:none;font-family:inherit}
     .btn-lg.solid{background:var(--accent);color:#fff}
     .btn-lg.solid:hover{background:var(--accent-hover);transform:translateY(-2px);box-shadow:0 10px 28px rgba(232,69,35,.4)}
     .btn-lg.ghost{background:transparent;color:var(--text);border:1.5px solid var(--border)}
     .btn-lg.ghost:hover{border-color:rgba(255,255,255,.4);transform:translateY(-2px)}
 
-    /* Floating preview cards */
     .hero-cards{position:relative;height:500px}
     .preview-card{position:absolute;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;width:255px;box-shadow:0 28px 56px rgba(0,0,0,.7)}
-
     .preview-card:nth-child(1){top:16px;right:32px;transform:rotate(2.5deg);z-index:3;animation:float1 4.2s ease-in-out infinite}
     .preview-card:nth-child(2){top:210px;right:0;transform:rotate(-2deg);z-index:2;animation:float2 5.1s ease-in-out infinite .6s}
     .preview-card:nth-child(3){top:88px;right:220px;transform:rotate(-1deg);z-index:1;opacity:.45;animation:float3 3.8s ease-in-out infinite 1.2s}
-
     @keyframes float1{0%,100%{transform:rotate(2.5deg) translateY(0)}50%{transform:rotate(2.5deg) translateY(-9px)}}
     @keyframes float2{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(-2deg) translateY(-7px)}}
     @keyframes float3{0%,100%{transform:rotate(-1deg) translateY(0)}50%{transform:rotate(-1deg) translateY(-11px)}}
@@ -65,7 +59,6 @@
     .badge-photo{background:rgba(59,130,246,.2);color:#60a5fa}
     .badge-visual{background:rgba(249,115,22,.2);color:#fb923c}
     .badge-content{background:rgba(34,197,94,.2);color:#4ade80}
-
     .card-cat{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
     .card-title{font-size:14px;font-weight:700;margin-bottom:3px}
     .card-creator{font-size:12px;color:var(--muted);margin-bottom:12px}
@@ -77,15 +70,14 @@
     .status-open{color:var(--green)}.status-open .dot{background:var(--green)}
     .status-partial{color:var(--orange)}.status-partial .dot{background:var(--orange)}
 
-    /* Stats bar */
     .stats-bar{background:var(--surface);border-top:1px solid var(--border);padding:22px 56px;display:flex;align-items:center;justify-content:center;gap:56px}
     .stat-num{font-size:26px;font-weight:800;letter-spacing:-1px}
     .stat-lbl{font-size:12px;color:var(--muted);margin-top:3px}
     .stat-div{width:1px;height:36px;background:var(--border)}
 
-    /* ──────────────── AUTH MODAL ──────────────────────────── */
+    /* AUTH MODAL */
     .overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(5px);z-index:300;display:flex;align-items:center;justify-content:center}
-    .modal{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:40px;width:400px;position:relative}
+    .modal{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:40px;width:420px;position:relative}
     .modal-x{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;font-family:inherit;line-height:1}
     .modal-x:hover{color:var(--text)}
     .modal h2{font-size:26px;font-weight:900;margin-bottom:5px}
@@ -98,14 +90,28 @@
     .choice-btn .choice-sub{font-size:11px;color:var(--muted)}
     .form-field{margin-bottom:14px}
     .form-field label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
-    .form-field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 13px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .15s}
-    .form-field input:focus{border-color:var(--accent)}
+    .form-field input,.form-field select,.form-field textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 13px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .15s}
+    .form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--accent)}
+    .form-field select option{background:var(--card)}
+    .form-field textarea{resize:vertical;min-height:70px}
     .btn-full{width:100%;padding:13px;font-size:15px;font-weight:700;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:background .2s;margin-top:4px}
     .btn-full:hover{background:var(--accent-hover)}
+    .btn-full:disabled{opacity:.5;cursor:not-allowed}
     .modal-foot{margin-top:18px;text-align:center;font-size:13px;color:var(--muted)}
     .modal-foot a{color:var(--accent);cursor:pointer;text-decoration:none}
+    .auth-tabs{display:flex;gap:0;margin-bottom:22px;border-bottom:1px solid var(--border)}
+    .auth-tab{flex:1;background:none;border:none;padding:10px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;transition:all .15s}
+    .auth-tab.active{color:var(--text);border-bottom-color:var(--accent)}
+    .err-msg{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:10px 13px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none}
+    .ok-msg{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#4ade80;padding:10px 13px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none}
 
-    /* ──────────────── PLATFORM NAV ───────────────────────── */
+    /* TOAST */
+    .toast{position:fixed;top:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 22px;z-index:999;font-size:14px;font-weight:600;box-shadow:0 16px 40px rgba(0,0,0,.7);transform:translateX(120%);transition:transform .3s ease}
+    .toast.show{transform:translateX(0)}
+    .toast.success{border-color:rgba(34,197,94,.4)}
+    .toast.error{border-color:rgba(239,68,68,.4)}
+
+    /* PLATFORM NAV */
     #platform{min-height:100vh;display:flex;flex-direction:column}
     .p-nav{display:flex;align-items:center;padding:0 32px;height:62px;background:rgba(8,8,8,.98);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;gap:8px}
     .p-nav .logo{margin-right:20px}
@@ -117,13 +123,16 @@
     .search input::placeholder{color:var(--dim)}
     .btn-sub{background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:600;padding:7px 15px;border-radius:6px;cursor:pointer;font-family:inherit;transition:background .2s;white-space:nowrap}
     .btn-sub:hover{background:var(--accent-hover)}
-    .avatar{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
+    .avatar{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;position:relative}
+    .avatar-menu{position:absolute;top:38px;right:0;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:150px;display:none;box-shadow:0 12px 32px rgba(0,0,0,.6)}
+    .avatar-menu.show{display:block}
+    .avatar-menu button{display:block;width:100%;text-align:left;background:none;border:none;color:var(--muted);font-size:13px;font-weight:500;padding:8px 12px;border-radius:6px;cursor:pointer;font-family:inherit}
+    .avatar-menu button:hover{background:rgba(255,255,255,.07);color:var(--text)}
 
-    /* ──────────────── PLATFORM CONTENT ────────────────────── */
+    /* PLATFORM CONTENT */
     .p-content{flex:1;padding:32px;max-width:1200px;margin:0 auto;width:100%}
     .sec-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
 
-    /* Featured */
     .featured-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:grid;grid-template-columns:260px 1fr;min-height:210px;transition:border-color .2s;cursor:pointer;margin-bottom:40px}
     .featured-card:hover{border-color:rgba(232,69,35,.45)}
     .feat-img{display:flex;align-items:center;justify-content:center;font-size:72px;position:relative}
@@ -141,13 +150,11 @@
     .btn-invest{background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:700;padding:11px 22px;border-radius:7px;cursor:pointer;font-family:inherit;transition:all .2s;display:inline-flex;align-items:center;gap:6px;width:fit-content}
     .btn-invest:hover{background:var(--accent-hover);transform:translateY(-1px)}
 
-    /* Filter tabs */
     .filter-row{display:flex;gap:7px;align-items:center;margin-bottom:22px;flex-wrap:wrap}
     .ftab{background:none;border:1px solid var(--border);color:var(--muted);font-size:13px;font-weight:500;padding:6px 15px;border-radius:20px;cursor:pointer;font-family:inherit;transition:all .15s}
     .ftab:hover{border-color:rgba(255,255,255,.3);color:var(--text)}
     .ftab.active{background:var(--text);border-color:var(--text);color:var(--bg);font-weight:600}
 
-    /* Project grid */
     .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:48px}
     .proj-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
     .proj-card:hover{background:var(--card-hover);border-color:rgba(255,255,255,.14);transform:translateY(-3px);box-shadow:0 18px 36px rgba(0,0,0,.6)}
@@ -163,7 +170,6 @@
     .invest-pill{background:var(--accent);border:none;color:#fff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:5px;cursor:pointer;font-family:inherit;opacity:0;transition:opacity .15s}
     .proj-card:hover .invest-pill{opacity:1}
 
-    /* Events section */
     .events-sep{padding-top:20px;border-top:1px solid var(--border)}
     .events-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
     .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
@@ -182,15 +188,11 @@
     .ev-btn.outline{background:none;color:var(--text);border:1px solid var(--border)}
     .ev-btn.outline:hover{border-color:rgba(255,255,255,.35)}
 
-    /* Submit modal */
     .smodal{width:440px;max-height:82vh;overflow-y:auto}
     .smodal::-webkit-scrollbar{width:4px}
     .smodal::-webkit-scrollbar-track{background:transparent}
     .smodal::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-    .form-field select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 13px;color:var(--text);font-size:14px;font-family:inherit;outline:none}
-    .form-field select option{background:var(--card)}
 
-    /* Brands page */
     .brands-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:40px}
     .brand-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:26px}
     .brand-icon{font-size:26px;margin-bottom:11px}
@@ -198,365 +200,312 @@
     .brand-desc{font-size:13px;color:var(--muted);line-height:1.6}
     .case-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:36px;margin-bottom:40px}
 
-    /* Events full page */
     .ev-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:40px}
     .ev-stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;text-align:center}
+
+    /* Detail modal */
+    .detail-modal{width:560px;max-height:85vh;overflow-y:auto}
+    .detail-thumb{width:100%;height:180px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:64px;margin-bottom:20px}
+    .detail-title{font-size:28px;font-weight:900;letter-spacing:-.5px;margin-bottom:6px}
+    .detail-creator{font-size:14px;color:var(--muted);margin-bottom:20px}
+    .detail-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:24px}
+    .detail-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px}
+    .detail-stat{background:var(--surface);border-radius:10px;padding:14px;text-align:center}
+    .detail-stat .ds-val{font-size:20px;font-weight:800;margin-bottom:2px}
+    .detail-stat .ds-lbl{font-size:11px;color:var(--muted)}
+    .invest-section{background:var(--surface);border-radius:12px;padding:20px;margin-top:20px}
+    .invest-section h3{font-size:16px;font-weight:700;margin-bottom:14px}
+    .invest-row{display:flex;gap:10px;align-items:flex-end}
+    .invest-row .form-field{flex:1;margin-bottom:0}
+    .invest-row button{height:42px;white-space:nowrap}
+
+    /* Spinner */
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    @media(max-width:768px){
+      .landing-nav{padding:16px 20px}
+      .landing-hero{grid-template-columns:1fr;padding:32px 20px}
+      .hero-text h1{font-size:36px}
+      .hero-cards{display:none}
+      .stats-bar{flex-wrap:wrap;padding:20px;gap:20px}
+      .stat-div{display:none}
+      .grid3{grid-template-columns:1fr}
+      .grid2{grid-template-columns:1fr}
+      .p-nav{padding:0 16px;flex-wrap:wrap;height:auto;padding:10px 16px;gap:6px}
+      .p-content{padding:20px}
+      .modal{width:calc(100vw - 32px);padding:28px}
+      .detail-modal,.smodal{width:calc(100vw - 32px)}
+      .featured-card{grid-template-columns:1fr}
+      .feat-img{height:140px}
+      .brands-grid{grid-template-columns:1fr}
+      .ev-stat-row{grid-template-columns:1fr}
+      .detail-stats{grid-template-columns:1fr}
+      .search{display:none}
+    }
   </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════════
-     AUTH MODAL
-═══════════════════════════════════════════════════════════════════════════════ -->
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══ AUTH MODAL ═══ -->
 <div class="overlay hidden" id="authModal">
   <div class="modal fade-in">
-    <button class="modal-x" onclick="closeAuth()">✕</button>
-    <h2>Join Burst House</h2>
-    <p class="modal-sub">Create your account to access the marketplace.</p>
-
-    <div class="choice-row">
-      <button class="choice-btn selected" id="choiceInvestor" onclick="pickRole('investor')">
-        <div class="choice-icon">💰</div>
-        <div class="choice-title">I'm an Investor</div>
-        <div class="choice-sub">I want to fund creative projects</div>
-      </button>
-      <button class="choice-btn" id="choiceCreative" onclick="pickRole('creative')">
-        <div class="choice-icon">🎨</div>
-        <div class="choice-title">I'm a Creative</div>
-        <div class="choice-sub">I want my project funded</div>
-      </button>
+    <button class="modal-x" onclick="closeAuth()">&#10005;</button>
+    <h2 id="authTitle">Join Burst House</h2>
+    <p class="modal-sub" id="authSub">Create your account to access the marketplace.</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabSignup" onclick="switchAuthTab('signup')">Sign Up</button>
+      <button class="auth-tab" id="tabSignin" onclick="switchAuthTab('signin')">Sign In</button>
     </div>
-
-    <div class="form-field">
-      <label>Full Name</label>
-      <input type="text" id="authName" placeholder="Your name">
+    <div class="err-msg" id="authErr"></div>
+    <div class="ok-msg" id="authOk"></div>
+    <!-- signup fields -->
+    <div id="signupFields">
+      <div class="choice-row">
+        <button class="choice-btn selected" id="choiceInvestor" onclick="pickRole('investor')">
+          <div class="choice-icon">&#x1F4B0;</div>
+          <div class="choice-title">I'm an Investor</div>
+          <div class="choice-sub">I want to fund creative projects</div>
+        </button>
+        <button class="choice-btn" id="choiceCreative" onclick="pickRole('creative')">
+          <div class="choice-icon">&#x1F3A8;</div>
+          <div class="choice-title">I'm a Creative</div>
+          <div class="choice-sub">I want my project funded</div>
+        </button>
+      </div>
+      <div class="form-field"><label>Full Name</label><input type="text" id="authName" placeholder="Your name"></div>
     </div>
-    <div class="form-field">
-      <label>Email</label>
-      <input type="email" placeholder="you@email.com">
-    </div>
-    <button class="btn-full" onclick="enterPlatform()">Enter the Marketplace →</button>
-    <div class="modal-foot">Already have an account? <a onclick="enterPlatform()">Sign in</a></div>
+    <div class="form-field"><label>Email</label><input type="email" id="authEmail" placeholder="you@email.com"></div>
+    <div class="form-field"><label>Password</label><input type="password" id="authPass" placeholder="Min 6 characters"></div>
+    <button class="btn-full" id="authBtn" onclick="handleAuth()">Create Account &#x2192;</button>
+    <div class="modal-foot" id="authFoot">Already have an account? <a onclick="switchAuthTab('signin')">Sign in</a></div>
   </div>
 </div>
 
-<!-- Submit project modal -->
+<!-- ═══ PROJECT DETAIL MODAL ═══ -->
+<div class="overlay hidden" id="detailModal">
+  <div class="modal detail-modal fade-in" id="detailContent"></div>
+</div>
+
+<!-- ═══ SUBMIT PROJECT MODAL ═══ -->
 <div class="overlay hidden" id="submitModal">
   <div class="modal smodal fade-in">
-    <button class="modal-x" onclick="closeSubmit()">✕</button>
+    <button class="modal-x" onclick="closeModal('submitModal')">&#10005;</button>
     <h2>Submit Your Project</h2>
     <p class="modal-sub">Tell us what you're making. We review every application within 7 days.</p>
-    <div class="form-field"><label>Project Title</label><input type="text" placeholder="What's this project called?"></div>
+    <div class="err-msg" id="submitErr"></div>
+    <div class="form-field"><label>Project Title</label><input type="text" id="subTitle" placeholder="What's this project called?"></div>
     <div class="form-field"><label>Project Type</label>
-      <select>
-        <option>Music — EP / Album / Single</option>
-        <option>Film / Short Film / Documentary</option>
-        <option>Visual Art / Exhibition</option>
-        <option>Fashion / Collection</option>
-        <option>Photography Project</option>
-        <option>Content Series / Campaign</option>
+      <select id="subCat">
+        <option value="music">Music — EP / Album / Single</option>
+        <option value="film">Film / Short Film / Documentary</option>
+        <option value="visual">Visual Art / Exhibition</option>
+        <option value="fashion">Fashion / Collection</option>
+        <option value="photo">Photography Project</option>
+        <option value="content">Content Series / Campaign</option>
       </select>
     </div>
-    <div class="form-field"><label>Amount Needed (₦)</label><input type="text" placeholder="e.g. ₦500,000"></div>
-    <div class="form-field"><label>Budget Breakdown</label><input type="text" placeholder="Studio, video, marketing, etc."></div>
-    <div class="form-field"><label>Instagram / Portfolio Link</label><input type="text" placeholder="Link to your work"></div>
-    <button class="btn-full" onclick="closeSubmit()">Submit Application →</button>
+    <div class="form-field"><label>Description</label><textarea id="subDesc" placeholder="Describe your project, vision, and goals..."></textarea></div>
+    <div class="form-field"><label>Amount Needed (&#8358;)</label><input type="number" id="subAmount" placeholder="e.g. 500000"></div>
+    <div class="form-field"><label>Budget Breakdown</label><input type="text" id="subBudget" placeholder="Studio, video, marketing, etc."></div>
+    <div class="form-field"><label>Return Type</label>
+      <select id="subReturn">
+        <option value="revenue_share">Revenue Share (%)</option>
+        <option value="brand_visibility">Brand Visibility / Content Rights</option>
+      </select>
+    </div>
+    <div class="form-field"><label>Return % (if revenue share)</label><input type="number" id="subRetPct" placeholder="e.g. 15"></div>
+    <div class="form-field"><label>Return Timeline</label><input type="text" id="subTimeline" placeholder="e.g. 24 months from release"></div>
+    <div class="form-field"><label>Instagram / Portfolio Link</label><input type="text" id="subLink" placeholder="Link to your work"></div>
+    <button class="btn-full" id="subBtn" onclick="submitProject()">Submit Application &#x2192;</button>
   </div>
 </div>
 
+<!-- ═══ APPLY TO PERFORM MODAL ═══ -->
+<div class="overlay hidden" id="performModal">
+  <div class="modal smodal fade-in">
+    <button class="modal-x" onclick="closeModal('performModal')">&#10005;</button>
+    <h2>Apply to Perform</h2>
+    <p class="modal-sub">Show us what you've got. Free to apply, free to perform.</p>
+    <div class="err-msg" id="perfErr"></div>
+    <div class="ok-msg" id="perfOk"></div>
+    <div class="form-field"><label>Full Name</label><input type="text" id="perfName" placeholder="Your name"></div>
+    <div class="form-field"><label>Email</label><input type="email" id="perfEmail" placeholder="you@email.com"></div>
+    <div class="form-field"><label>I want to</label>
+      <select id="perfType">
+        <option value="perform">Perform (Music / Spoken Word / DJ)</option>
+        <option value="exhibit">Exhibit (Art / Photography)</option>
+        <option value="vendor">Be a Vendor</option>
+      </select>
+    </div>
+    <div class="form-field"><label>Category</label><input type="text" id="perfCat" placeholder="e.g. Afrobeats, Oil Painting, etc."></div>
+    <div class="form-field"><label>Short Bio</label><textarea id="perfBio" placeholder="Tell us about yourself and your work..."></textarea></div>
+    <div class="form-field"><label>Social / Portfolio Link</label><input type="text" id="perfLink" placeholder="Instagram, YouTube, website..."></div>
+    <button class="btn-full" onclick="submitPerform()">Submit Application &#x2192;</button>
+  </div>
+</div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════════
-     LANDING / AUTH GATE
-═══════════════════════════════════════════════════════════════════════════════ -->
+<!-- ═══ BRAND INQUIRY MODAL ═══ -->
+<div class="overlay hidden" id="brandModal">
+  <div class="modal smodal fade-in">
+    <button class="modal-x" onclick="closeModal('brandModal')">&#10005;</button>
+    <h2>Partner With Us</h2>
+    <p class="modal-sub">Tell us about your brand. We'll build something that works.</p>
+    <div class="err-msg" id="brandErr"></div>
+    <div class="ok-msg" id="brandOk"></div>
+    <div class="form-field"><label>Company / Brand Name</label><input type="text" id="brCompany" placeholder="Your brand name"></div>
+    <div class="form-field"><label>Contact Name</label><input type="text" id="brContact" placeholder="Your name"></div>
+    <div class="form-field"><label>Email</label><input type="email" id="brEmail" placeholder="you@company.com"></div>
+    <div class="form-field"><label>What are you interested in?</label>
+      <select id="brService">
+        <option value="event_sponsorship">Event Sponsorship</option>
+        <option value="marketing_solutions">Marketing Solutions</option>
+        <option value="brand_partnership">Brand Partnership</option>
+      </select>
+    </div>
+    <div class="form-field"><label>Tell us more</label><textarea id="brMsg" placeholder="What does your brand need? Budget range? Goals?"></textarea></div>
+    <button class="btn-full" onclick="submitBrand()">Send Inquiry &#x2192;</button>
+  </div>
+</div>
+
+<!-- ═══ LANDING ═══ -->
 <div id="landing">
-
   <nav class="landing-nav">
     <span class="logo">BURST<span>HOUSE</span></span>
     <div class="landing-nav-right">
-      <button class="btn-ghost" onclick="openAuth()">Sign in</button>
-      <button class="btn-primary" onclick="openAuth()">Join free →</button>
+      <button class="btn-ghost" onclick="openAuth('signin')">Sign in</button>
+      <button class="btn-primary" onclick="openAuth('signup')">Join free &#x2192;</button>
     </div>
   </nav>
-
   <div class="landing-hero">
-
-    <!-- LEFT: headline + CTAs -->
     <div class="hero-text">
       <h1>Invest in creative<br>projects.</h1>
       <h1 class="accent-line">Get your creative<br>project funded.</h1>
       <p class="hero-sub">Browse vetted projects. Commit your investment. Burst House manages every cent.</p>
       <div class="hero-ctas">
-        <button class="btn-lg solid" onclick="openAuth()">Browse Projects →</button>
-        <button class="btn-lg ghost" onclick="openAuth()">Submit Your Project</button>
+        <button class="btn-lg solid" onclick="openAuth('signup')">Browse Projects &#x2192;</button>
+        <button class="btn-lg ghost" onclick="openAuth('signup')">Submit Your Project</button>
       </div>
     </div>
-
-    <!-- RIGHT: floating preview cards -->
     <div class="hero-cards">
-
-      <!-- Card 1 — Music -->
       <div class="preview-card">
-        <div class="card-thumb" style="background:linear-gradient(135deg,#1e1b4b,#4c1d95)">🎵</div>
-        <div class="card-cat"><span class="badge badge-music">Music</span> EP · 6 tracks</div>
+        <div class="card-thumb" style="background:linear-gradient(135deg,#1e1b4b,#4c1d95)">&#x1F3B5;</div>
+        <div class="card-cat"><span class="badge badge-music">Music</span> EP &middot; 6 tracks</div>
         <div class="card-title">Lekan's Debut EP</div>
-        <div class="card-creator">Lekan · Abuja</div>
+        <div class="card-creator">Lekan &middot; Abuja</div>
         <div class="card-hr"></div>
-        <div class="card-amount">₦480,000</div>
-        <div class="card-return">15% revenue share · 24 months</div>
+        <div class="card-amount">&#8358;480,000</div>
+        <div class="card-return">15% revenue share &middot; 24 months</div>
         <div class="status status-open"><div class="dot"></div> Open for investment</div>
       </div>
-
-      <!-- Card 2 — Film -->
       <div class="preview-card">
-        <div class="card-thumb" style="background:linear-gradient(135deg,#022c22,#065f46)">🎬</div>
+        <div class="card-thumb" style="background:linear-gradient(135deg,#022c22,#065f46)">&#x1F3AC;</div>
         <div class="card-cat"><span class="badge badge-film">Film</span> Documentary</div>
         <div class="card-title">Unseen Stories</div>
-        <div class="card-creator">Adaeze · Lagos</div>
+        <div class="card-creator">Adaeze &middot; Lagos</div>
         <div class="card-hr"></div>
-        <div class="card-amount">₦750,000</div>
-        <div class="card-return">Brand visibility · content rights</div>
+        <div class="card-amount">&#8358;750,000</div>
+        <div class="card-return">Brand visibility &middot; content rights</div>
         <div class="status status-partial"><div class="dot"></div> 40% funded</div>
       </div>
-
-      <!-- Card 3 — Fashion (faded bg) -->
       <div class="preview-card">
-        <div class="card-thumb" style="background:linear-gradient(135deg,#4a044e,#86198f)">👗</div>
+        <div class="card-thumb" style="background:linear-gradient(135deg,#4a044e,#86198f)">&#x1F457;</div>
         <div class="card-cat"><span class="badge badge-fashion">Fashion</span> Collection</div>
         <div class="card-title">SS26 Collection</div>
-        <div class="card-creator">Tobi · Lagos</div>
+        <div class="card-creator">Tobi &middot; Lagos</div>
         <div class="card-hr"></div>
-        <div class="card-amount">₦1,200,000</div>
-        <div class="card-return">20% revenue share · 18 months</div>
+        <div class="card-amount">&#8358;1,200,000</div>
+        <div class="card-return">20% revenue share &middot; 18 months</div>
         <div class="status status-open"><div class="dot"></div> Open for investment</div>
       </div>
-
-    </div><!-- /hero-cards -->
-  </div><!-- /landing-hero -->
-
-  <!-- Stats bar -->
+    </div>
+  </div>
   <div class="stats-bar">
     <div><div class="stat-num" style="color:var(--accent)">5+</div><div class="stat-lbl">Events run</div></div>
     <div class="stat-div"></div>
     <div><div class="stat-num">3,000+</div><div class="stat-lbl">Attendees per event</div></div>
     <div class="stat-div"></div>
-    <div><div class="stat-num">₦500K+</div><div class="stat-lbl">Brand deals secured</div></div>
+    <div><div class="stat-num">&#8358;500K+</div><div class="stat-lbl">Brand deals secured</div></div>
     <div class="stat-div"></div>
     <div><div class="stat-num">800+</div><div class="stat-lbl">Orders generated for one partner in a single week</div></div>
   </div>
+</div>
 
-</div><!-- /landing -->
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════════════
-     PLATFORM
-═══════════════════════════════════════════════════════════════════════════════ -->
+<!-- ═══ PLATFORM ═══ -->
 <div id="platform" class="hidden">
-
-  <!-- Platform nav -->
   <nav class="p-nav">
     <span class="logo" onclick="setView('marketplace')">BURST<span>HOUSE</span></span>
     <button class="nav-link active" id="nl-marketplace" onclick="setView('marketplace')">Browse</button>
     <button class="nav-link" id="nl-events" onclick="setView('events')">Events</button>
     <button class="nav-link" id="nl-brands" onclick="setView('brands')">For Brands</button>
-
     <div class="p-nav-right">
       <div class="search">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" placeholder="Search projects...">
+        <input type="text" placeholder="Search projects..." oninput="searchProjects(this.value)">
       </div>
-      <button class="btn-sub" onclick="openSubmit()">+ Submit Project</button>
-      <div class="avatar" id="userAvatar">A</div>
+      <button class="btn-sub" onclick="openModal('submitModal')">+ Submit Project</button>
+      <div class="avatar" id="userAvatar" onclick="toggleAvatarMenu()">A
+        <div class="avatar-menu" id="avatarMenu">
+          <button id="menuName" style="color:var(--text);font-weight:700;cursor:default">User</button>
+          <button onclick="signOut()">Sign out</button>
+        </div>
+      </div>
     </div>
   </nav>
 
   <div class="p-content">
-
-    <!-- ─────── MARKETPLACE VIEW ─────── -->
+    <!-- MARKETPLACE VIEW -->
     <div id="marketplace-view" class="fade-in">
-
-      <!-- Featured -->
-      <div class="sec-label">⭐ Featured Project</div>
-      <div class="featured-card">
-        <div class="feat-img" style="background:linear-gradient(135deg,#1a0a2e 0%,#4c1d95 60%,#1a0a2e 100%)">
-          <span style="position:relative;z-index:1">🎵</span>
-        </div>
-        <div class="feat-body">
-          <div>
-            <div class="feat-tag">🟢 Open for investment</div>
-            <div class="feat-title">Lekan's Debut EP</div>
-            <div class="feat-creator">Lekan · Music · Abuja · 6 tracks</div>
-            <div class="feat-meta">
-              <div><div class="meta-lbl">Amount needed</div><div class="meta-val">₦480,000</div></div>
-              <div><div class="meta-lbl">Return</div><div class="meta-val">15% rev share</div></div>
-              <div><div class="meta-lbl">Timeline</div><div class="meta-val">24 months</div></div>
-            </div>
-            <div class="prog-bar" style="max-width:300px"><div class="prog-fill" style="width:25%"></div></div>
-            <div class="prog-txt">₦120,000 raised · 25% funded</div>
-          </div>
-          <button class="btn-invest">Invest in This Project →</button>
-        </div>
-      </div>
-
-      <!-- Filters -->
+      <div id="featuredArea"></div>
       <div class="filter-row">
-        <button class="ftab active" onclick="filter('all',this)">All Projects</button>
-        <button class="ftab" onclick="filter('music',this)">🎵 Music</button>
-        <button class="ftab" onclick="filter('film',this)">🎬 Film</button>
-        <button class="ftab" onclick="filter('fashion',this)">👗 Fashion</button>
-        <button class="ftab" onclick="filter('visual',this)">🎨 Visual Art</button>
-        <button class="ftab" onclick="filter('photo',this)">📸 Photography</button>
+        <button class="ftab active" onclick="filterCat('all',this)">All Projects</button>
+        <button class="ftab" onclick="filterCat('music',this)">&#x1F3B5; Music</button>
+        <button class="ftab" onclick="filterCat('film',this)">&#x1F3AC; Film</button>
+        <button class="ftab" onclick="filterCat('fashion',this)">&#x1F457; Fashion</button>
+        <button class="ftab" onclick="filterCat('visual',this)">&#x1F3A8; Visual Art</button>
+        <button class="ftab" onclick="filterCat('photo',this)">&#x1F4F8; Photography</button>
       </div>
-
-      <!-- Grid label -->
       <div class="sec-label">Open for Investment</div>
-
-      <!-- Project cards -->
-      <div class="grid3" id="projGrid">
-
-        <div class="proj-card" data-cat="music">
-          <div class="proj-img" style="background:linear-gradient(135deg,#1e1b4b,#4c1d95)">🎵</div>
-          <div class="proj-body">
-            <div class="proj-cat"><span class="badge badge-music">Music</span> EP · 6 Tracks</div>
-            <div class="proj-title">Lekan's Debut EP</div>
-            <div class="proj-creator">Lekan · Abuja</div>
-            <div class="proj-hr"></div>
-            <div class="proj-amount">₦480,000</div>
-            <div class="proj-return">15% revenue share · 24 months</div>
-            <div class="proj-foot">
-              <div class="status status-open"><div class="dot"></div> Open</div>
-              <button class="invest-pill">Invest →</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="proj-card" data-cat="film">
-          <div class="proj-img" style="background:linear-gradient(135deg,#022c22,#065f46)">🎬</div>
-          <div class="proj-body">
-            <div class="proj-cat"><span class="badge badge-film">Film</span> Documentary</div>
-            <div class="proj-title">Unseen Stories</div>
-            <div class="proj-creator">Adaeze · Lagos</div>
-            <div class="proj-hr"></div>
-            <div class="proj-amount">₦750,000</div>
-            <div class="proj-return">Brand visibility · content rights</div>
-            <div class="proj-foot">
-              <div class="status status-partial"><div class="dot"></div> 40% funded</div>
-              <button class="invest-pill">Invest →</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="proj-card" data-cat="fashion">
-          <div class="proj-img" style="background:linear-gradient(135deg,#4a044e,#86198f)">👗</div>
-          <div class="proj-body">
-            <div class="proj-cat"><span class="badge badge-fashion">Fashion</span> Collection</div>
-            <div class="proj-title">SS26 Collection</div>
-            <div class="proj-creator">Tobi · Lagos</div>
-            <div class="proj-hr"></div>
-            <div class="proj-amount">₦1,200,000</div>
-            <div class="proj-return">20% revenue share · 18 months</div>
-            <div class="proj-foot">
-              <div class="status status-open"><div class="dot"></div> Open</div>
-              <button class="invest-pill">Invest →</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="proj-card" data-cat="photo">
-          <div class="proj-img" style="background:linear-gradient(135deg,#0c1445,#1e3a8a)">📸</div>
-          <div class="proj-body">
-            <div class="proj-cat"><span class="badge badge-photo">Photography</span> Exhibition</div>
-            <div class="proj-title">Faces of the City</div>
-            <div class="proj-creator">Chioma · Port Harcourt</div>
-            <div class="proj-hr"></div>
-            <div class="proj-amount">₦320,000</div>
-            <div class="proj-return">12% revenue share · 12 months</div>
-            <div class="proj-foot">
-              <div class="status status-open"><div class="dot"></div> Open</div>
-              <button class="invest-pill">Invest →</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="proj-card" data-cat="visual">
-          <div class="proj-img" style="background:linear-gradient(135deg,#431407,#9a3412)">🎨</div>
-          <div class="proj-body">
-            <div class="proj-cat"><span class="badge badge-visual">Visual Art</span> Series</div>
-            <div class="proj-title">Afro Futures</div>
-            <div class="proj-creator">Ola · Abuja</div>
-            <div class="proj-hr"></div>
-            <div class="proj-amount">₦600,000</div>
-            <div class="proj-return">18% revenue share · 20 months</div>
-            <div class="proj-foot">
-              <div class="status status-partial"><div class="dot"></div> 60% funded</div>
-              <button class="invest-pill">Invest →</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="proj-card" data-cat="content">
-          <div class="proj-img" style="background:linear-gradient(135deg,#042f2e,#134e4a)">📱</div>
-          <div class="proj-body">
-            <div class="proj-cat"><span class="badge badge-content">Content</span> Campaign</div>
-            <div class="proj-title">The Culture Report</div>
-            <div class="proj-creator">Bode · Lagos</div>
-            <div class="proj-hr"></div>
-            <div class="proj-amount">₦400,000</div>
-            <div class="proj-return">Brand visibility · series rights</div>
-            <div class="proj-foot">
-              <div class="status status-open"><div class="dot"></div> Open</div>
-              <button class="invest-pill">Invest →</button>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /grid -->
+      <div class="grid3" id="projGrid"></div>
 
       <!-- Events subsection -->
       <div class="events-sep">
         <div class="events-hdr">
           <div>
-            <div class="sec-label" style="margin-bottom:4px">🎪 Events</div>
+            <div class="sec-label" style="margin-bottom:4px">&#x1F3AA; Events</div>
             <div style="font-size:20px;font-weight:800">Creative Fest</div>
           </div>
-          <button class="btn-ghost" onclick="setView('events')" style="font-size:13px">View all events →</button>
+          <button class="btn-ghost" onclick="setView('events')" style="font-size:13px">View all events &#x2192;</button>
         </div>
         <div class="grid2">
           <div class="ev-card">
-            <div class="ev-date" style="background:var(--accent)">
-              <div class="ev-mon">TBC</div>
-              <div class="ev-num">005</div>
-            </div>
+            <div class="ev-date" style="background:var(--accent)"><div class="ev-mon">TBC</div><div class="ev-num">005</div></div>
             <div>
-              <div class="ev-tag">Upcoming · Abuja</div>
+              <div class="ev-tag">Upcoming &middot; Abuja</div>
               <div class="ev-name">Creative Fest 005</div>
               <div class="ev-meta">Artists perform. Painters exhibit. Brands connect. 3,000+ people.</div>
               <div class="ev-btns">
-                <button class="ev-btn solid">Apply to Perform</button>
-                <button class="ev-btn outline">Bring Your Brand</button>
+                <button class="ev-btn solid" onclick="openModal('performModal')">Apply to Perform</button>
+                <button class="ev-btn outline" onclick="openModal('brandModal')">Bring Your Brand</button>
               </div>
             </div>
           </div>
           <div class="ev-card" style="opacity:.55">
-            <div class="ev-date" style="background:#2a2a2a">
-              <div class="ev-mon">Dec</div>
-              <div class="ev-num">004</div>
-            </div>
+            <div class="ev-date" style="background:#2a2a2a"><div class="ev-mon">Dec</div><div class="ev-num">004</div></div>
             <div>
-              <div class="ev-tag" style="color:var(--muted)">Past · Abuja</div>
+              <div class="ev-tag" style="color:var(--muted)">Past &middot; Abuja</div>
               <div class="ev-name">Creative Fest 004</div>
-              <div class="ev-meta">3,200+ attendees · 24 performers · 8 brand partners</div>
-              <div class="ev-btns">
-                <button class="ev-btn outline">See Photos</button>
-              </div>
+              <div class="ev-meta">3,200+ attendees &middot; 24 performers &middot; 8 brand partners</div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-    </div><!-- /marketplace-view -->
-
-
-    <!-- ─────── EVENTS VIEW ─────── -->
+    <!-- EVENTS VIEW -->
     <div id="events-view" class="hidden fade-in">
       <div style="margin-bottom:32px">
         <h1 style="font-size:42px;font-weight:900;letter-spacing:-1.5px">Creative Fest.</h1>
@@ -565,44 +514,41 @@
       <div class="ev-stat-row">
         <div class="ev-stat"><div style="font-size:34px;font-weight:900;color:var(--accent)">3K+</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Attendees per event</div></div>
         <div class="ev-stat"><div style="font-size:34px;font-weight:900">5</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Events completed</div></div>
-        <div class="ev-stat"><div style="font-size:34px;font-weight:900;color:var(--green)">₦0</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Cost to perform</div></div>
+        <div class="ev-stat"><div style="font-size:34px;font-weight:900;color:var(--green)">&#8358;0</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Cost to perform</div></div>
       </div>
       <div class="sec-label" style="margin-bottom:14px">Upcoming</div>
       <div class="ev-card" style="max-width:580px;margin-bottom:40px">
-        <div class="ev-date" style="background:var(--accent)">
-          <div class="ev-mon">TBC</div><div class="ev-num">005</div>
-        </div>
+        <div class="ev-date" style="background:var(--accent)"><div class="ev-mon">TBC</div><div class="ev-num">005</div></div>
         <div>
-          <div class="ev-tag">Creative Fest 005 · Abuja</div>
+          <div class="ev-tag">Creative Fest 005 &middot; Abuja</div>
           <div class="ev-name" style="font-size:20px">The 5th Burst House Creative Fest</div>
           <div class="ev-meta" style="margin-bottom:10px">Date to be announced. Applications open now for performers, artists, and brand partners.</div>
           <div class="ev-btns">
-            <button class="ev-btn solid">Apply to Perform</button>
-            <button class="ev-btn outline">Sponsor the Fest</button>
+            <button class="ev-btn solid" onclick="openModal('performModal')">Apply to Perform</button>
+            <button class="ev-btn outline" onclick="openModal('brandModal')">Sponsor the Fest</button>
           </div>
         </div>
       </div>
       <div class="sec-label" style="margin-bottom:14px">Past Events</div>
       <div class="grid2">
-        <div class="ev-card" style="opacity:.65"><div class="ev-date" style="background:#2a2a2a"><div class="ev-mon">Dec</div><div class="ev-num">004</div></div><div><div class="ev-tag" style="color:var(--muted)">Abuja · Dec 2025</div><div class="ev-name">Creative Fest 004</div><div class="ev-meta">3,200 attendees · 24 performers · 8 brand activations</div><div class="ev-btns"><button class="ev-btn outline">View Gallery</button></div></div></div>
-        <div class="ev-card" style="opacity:.65"><div class="ev-date" style="background:#2a2a2a"><div class="ev-mon">Jan</div><div class="ev-num">003</div></div><div><div class="ev-tag" style="color:var(--muted)">Abuja · Jan 2025</div><div class="ev-name">Creative Fest 003</div><div class="ev-meta">2,800 attendees · 18 performers · 5 brand activations</div><div class="ev-btns"><button class="ev-btn outline">View Gallery</button></div></div></div>
-        <div class="ev-card" style="opacity:.65"><div class="ev-date" style="background:#2a2a2a"><div class="ev-mon">Aug</div><div class="ev-num">002</div></div><div><div class="ev-tag" style="color:var(--muted)">Abuja · Aug 2024</div><div class="ev-name">Creative Fest 002</div><div class="ev-meta">2,100 attendees · 14 performers · 4 brand activations</div><div class="ev-btns"><button class="ev-btn outline">View Gallery</button></div></div></div>
-        <div class="ev-card" style="opacity:.65"><div class="ev-date" style="background:#2a2a2a"><div class="ev-mon">Feb</div><div class="ev-num">001</div></div><div><div class="ev-tag" style="color:var(--muted)">Abuja · Feb 2024</div><div class="ev-name">Creative Fest 001</div><div class="ev-meta">1,500 attendees · 10 performers · The beginning.</div><div class="ev-btns"><button class="ev-btn outline">View Gallery</button></div></div></div>
+        <div class="ev-card" style="opacity:.65"><div class="ev-date" style="background:#2a2a2a"><div class="ev-mon">Dec</div><div class="ev-num">004</div></div><div><div class="ev-tag" style="color:var(--muted)">Abuja &middot; Dec 2025</div><div class="ev-name">Creative Fest 004</div><div class="ev-meta">3,200 attendees &middot; 24 performers &middot; 8 brand activations</div></div></div>
+        <div class="ev-card" style="opacity:.65"><div class="ev-date" style="background:#2a2a2a"><div class="ev-mon">Jan</div><div class="ev-num">003</div></div><div><div class="ev-tag" style="color:var(--muted)">Abuja &middot; Jan 2025</div><div class="ev-name">Creative Fest 003</div><div class="ev-meta">2,800 attendees &middot; 18 performers &middot; 5 brand activations</div></div></div>
+        <div class="ev-card" style="opacity:.65"><div class="ev-date" style="background:#2a2a2a"><div class="ev-mon">Aug</div><div class="ev-num">002</div></div><div><div class="ev-tag" style="color:var(--muted)">Abuja &middot; Aug 2024</div><div class="ev-name">Creative Fest 002</div><div class="ev-meta">2,100 attendees &middot; 14 performers &middot; 4 brand activations</div></div></div>
+        <div class="ev-card" style="opacity:.65"><div class="ev-date" style="background:#2a2a2a"><div class="ev-mon">Feb</div><div class="ev-num">001</div></div><div><div class="ev-tag" style="color:var(--muted)">Abuja &middot; Feb 2024</div><div class="ev-name">Creative Fest 001</div><div class="ev-meta">1,500 attendees &middot; 10 performers &middot; The beginning.</div></div></div>
       </div>
-    </div><!-- /events-view -->
+    </div>
 
-
-    <!-- ─────── BRANDS VIEW ─────── -->
+    <!-- BRANDS VIEW -->
     <div id="brands-view" class="hidden fade-in">
       <div style="margin-bottom:32px">
         <h1 style="font-size:42px;font-weight:900;letter-spacing:-1.5px;max-width:560px">Let your product reach the creative generation.</h1>
         <p style="color:var(--muted);margin-top:10px;font-size:16px;max-width:520px;line-height:1.6">3,000+ engaged young creatives at every event. We build the activation that makes them trust — and buy — your product.</p>
-        <button class="btn-lg solid" style="margin-top:24px">Fill the Form — Let's Talk →</button>
+        <button class="btn-lg solid" style="margin-top:24px" onclick="openModal('brandModal')">Fill the Form — Let's Talk &#x2192;</button>
       </div>
       <div class="brands-grid">
-        <div class="brand-card"><div class="brand-icon">🎪</div><div class="brand-title">Event Sponsorship</div><div class="brand-desc">Logo, stage presence, naming rights. Your brand in front of 3,000+ people who actually care.</div></div>
-        <div class="brand-card"><div class="brand-icon">📊</div><div class="brand-title">Marketing Solutions</div><div class="brand-desc">Tell us your objective. We research your industry and build a custom campaign around your product.</div></div>
-        <div class="brand-card"><div class="brand-icon">🤝</div><div class="brand-title">Brand Partnerships</div><div class="brand-desc">Long-term ambassador deals with our creatives. Content, reach, and trust. Commission-based.</div></div>
+        <div class="brand-card"><div class="brand-icon">&#x1F3AA;</div><div class="brand-title">Event Sponsorship</div><div class="brand-desc">Logo, stage presence, naming rights. Your brand in front of 3,000+ people who actually care.</div></div>
+        <div class="brand-card"><div class="brand-icon">&#x1F4CA;</div><div class="brand-title">Marketing Solutions</div><div class="brand-desc">Tell us your objective. We research your industry and build a custom campaign around your product.</div></div>
+        <div class="brand-card"><div class="brand-icon">&#x1F91D;</div><div class="brand-title">Brand Partnerships</div><div class="brand-desc">Long-term ambassador deals with our creatives. Content, reach, and trust. Commission-based.</div></div>
       </div>
       <div class="case-box">
         <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent);margin-bottom:14px">Real Result</div>
@@ -612,73 +558,482 @@
       <div style="text-align:center;padding:48px 0">
         <div style="font-size:22px;font-weight:800;margin-bottom:10px">Ready to get to work?</div>
         <p style="color:var(--muted);margin-bottom:24px">Tell us about your brand. We'll build something that works.</p>
-        <button class="btn-lg solid">Fill The Form →</button>
+        <button class="btn-lg solid" onclick="openModal('brandModal')">Fill The Form &#x2192;</button>
       </div>
-    </div><!-- /brands-view -->
-
-  </div><!-- /p-content -->
-</div><!-- /platform -->
-
+    </div>
+  </div>
+</div>
 
 <script>
-  let currentRole = 'investor';
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONFIG — Replace PAYSTACK_KEY with your real Paystack public key
+// ═══════════════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://fobxtltydzhgrhpbnxdq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvYnh0bHR5ZHpoZ3JocGJueGRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1Nzg5OTksImV4cCI6MjA4ODE1NDk5OX0.yeSU7M85-avKzXmXrLUDDBAuaW3cTkXS80TgTB6Exis';
+const PAYSTACK_KEY = 'pk_live_9c9fd70f398c69636c9bde1c27c053df958842a4'; // ← Paystack public key
 
-  function openAuth() {
-    document.getElementById('authModal').classList.remove('hidden');
-  }
-  function closeAuth() {
-    document.getElementById('authModal').classList.add('hidden');
-  }
-  function pickRole(role) {
-    currentRole = role;
-    document.getElementById('choiceInvestor').classList.toggle('selected', role === 'investor');
-    document.getElementById('choiceCreative').classList.toggle('selected', role === 'creative');
-  }
-  function enterPlatform() {
-    const name = document.getElementById('authName').value.trim() || 'A';
-    document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-    closeAuth();
-    document.getElementById('landing').classList.add('hidden');
-    const p = document.getElementById('platform');
-    p.classList.remove('hidden');
-    p.classList.add('fade-in');
-  }
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  function setView(view) {
-    ['marketplace','events','brands'].forEach(v => {
-      document.getElementById(v+'-view').classList.add('hidden');
-      const nl = document.getElementById('nl-'+v);
-      if(nl) nl.classList.remove('active');
-    });
-    document.getElementById(view+'-view').classList.remove('hidden');
-    document.getElementById(view+'-view').classList.add('fade-in');
-    const nl = document.getElementById('nl-'+view);
-    if(nl) nl.classList.add('active');
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════════
+let currentUser = null;
+let currentProfile = null;
+let projects = [];
+let authMode = 'signup';
+let selectedRole = 'investor';
 
-  function filter(cat, btn) {
-    document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.proj-card').forEach(c => {
-      c.style.display = (cat === 'all' || c.dataset.cat === cat) ? 'block' : 'none';
-    });
+// ═══════════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════════
+(async function init() {
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadProfile();
+    showPlatform();
   }
+  await loadProjects();
+  renderProjects();
 
-  function openSubmit() {
-    document.getElementById('submitModal').classList.remove('hidden');
-  }
-  function closeSubmit() {
-    document.getElementById('submitModal').classList.add('hidden');
-  }
-
-  // Close on overlay click
-  ['authModal','submitModal'].forEach(id => {
-    document.getElementById(id).addEventListener('click', function(e) {
-      if(e.target === this) this.classList.add('hidden');
-    });
+  db.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      currentUser = session.user;
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      currentProfile = null;
+    }
   });
-</script>
+})();
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════════════════════════
+function openAuth(mode) {
+  authMode = mode || 'signup';
+  switchAuthTab(authMode);
+  document.getElementById('authModal').classList.remove('hidden');
+}
+function closeAuth() {
+  document.getElementById('authModal').classList.add('hidden');
+  document.getElementById('authErr').style.display = 'none';
+  document.getElementById('authOk').style.display = 'none';
+}
+function switchAuthTab(mode) {
+  authMode = mode;
+  document.getElementById('tabSignup').classList.toggle('active', mode === 'signup');
+  document.getElementById('tabSignin').classList.toggle('active', mode === 'signin');
+  document.getElementById('signupFields').classList.toggle('hidden', mode === 'signin');
+  document.getElementById('authBtn').textContent = mode === 'signup' ? 'Create Account \u2192' : 'Sign In \u2192';
+  document.getElementById('authTitle').textContent = mode === 'signup' ? 'Join Burst House' : 'Welcome Back';
+  document.getElementById('authSub').textContent = mode === 'signup' ? 'Create your account to access the marketplace.' : 'Sign in to your account.';
+  document.getElementById('authFoot').innerHTML = mode === 'signup'
+    ? 'Already have an account? <a onclick="switchAuthTab(\'signin\')">Sign in</a>'
+    : 'New here? <a onclick="switchAuthTab(\'signup\')">Create account</a>';
+  document.getElementById('authErr').style.display = 'none';
+  document.getElementById('authOk').style.display = 'none';
+}
+function pickRole(role) {
+  selectedRole = role;
+  document.getElementById('choiceInvestor').classList.toggle('selected', role === 'investor');
+  document.getElementById('choiceCreative').classList.toggle('selected', role === 'creative');
+}
+
+async function handleAuth() {
+  const btn = document.getElementById('authBtn');
+  const errEl = document.getElementById('authErr');
+  const okEl = document.getElementById('authOk');
+  errEl.style.display = 'none';
+  okEl.style.display = 'none';
+  const email = document.getElementById('authEmail').value.trim();
+  const pass = document.getElementById('authPass').value;
+
+  if (!email || !pass) { showAuthErr('Please fill in email and password.'); return; }
+  if (pass.length < 6) { showAuthErr('Password must be at least 6 characters.'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  if (authMode === 'signup') {
+    const name = document.getElementById('authName').value.trim();
+    if (!name) { showAuthErr('Please enter your name.'); btn.disabled = false; btn.textContent = 'Create Account \u2192'; return; }
+
+    const { data, error } = await db.auth.signUp({ email, password: pass });
+    if (error) { showAuthErr(error.message); btn.disabled = false; btn.textContent = 'Create Account \u2192'; return; }
+
+    if (data.user) {
+      currentUser = data.user;
+      // Create profile
+      await db.from('bh_profiles').upsert({ id: data.user.id, name, role: selectedRole });
+      currentProfile = { id: data.user.id, name, role: selectedRole };
+
+      // If session exists, go straight in
+      if (data.session) {
+        closeAuth();
+        showPlatform();
+      } else {
+        // Email confirmation required
+        okEl.textContent = 'Check your email to confirm your account, then sign in.';
+        okEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Create Account \u2192';
+      }
+    }
+  } else {
+    const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+    if (error) { showAuthErr(error.message); btn.disabled = false; btn.textContent = 'Sign In \u2192'; return; }
+    currentUser = data.user;
+    await loadProfile();
+    closeAuth();
+    showPlatform();
+  }
+}
+
+function showAuthErr(msg) {
+  const el = document.getElementById('authErr');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function loadProfile() {
+  if (!currentUser) return;
+  const { data } = await db.from('bh_profiles').select('*').eq('id', currentUser.id).single();
+  if (data) currentProfile = data;
+}
+
+async function signOut() {
+  await db.auth.signOut();
+  currentUser = null;
+  currentProfile = null;
+  document.getElementById('platform').classList.add('hidden');
+  document.getElementById('landing').classList.remove('hidden');
+  document.getElementById('avatarMenu').classList.remove('show');
+}
+
+function showPlatform() {
+  document.getElementById('landing').classList.add('hidden');
+  document.getElementById('platform').classList.remove('hidden');
+  document.getElementById('platform').classList.add('fade-in');
+  const initial = (currentProfile?.name || currentUser?.email || 'U').charAt(0).toUpperCase();
+  document.getElementById('userAvatar').childNodes[0].textContent = initial;
+  document.getElementById('menuName').textContent = currentProfile?.name || currentUser?.email || 'User';
+  renderProjects();
+}
+
+function toggleAvatarMenu() {
+  document.getElementById('avatarMenu').classList.toggle('show');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PROJECTS
+// ═══════════════════════════════════════════════════════════════════════════════
+async function loadProjects() {
+  const { data } = await db.from('bh_projects').select('*').in('status', ['active','closed']).order('created_at', { ascending: false });
+  if (data) projects = data;
+}
+
+function renderProjects(filter) {
+  const grid = document.getElementById('projGrid');
+  const feat = document.getElementById('featuredArea');
+  const list = filter && filter !== 'all' ? projects.filter(p => p.category === filter) : projects;
+
+  // Featured = first project
+  if (list.length > 0) {
+    const p = list[0];
+    const pct = p.amount_needed > 0 ? Math.round((p.amount_raised / p.amount_needed) * 100) : 0;
+    feat.innerHTML = `
+      <div class="sec-label">\u2B50 Featured Project</div>
+      <div class="featured-card" onclick="openDetail('${p.id}')">
+        <div class="feat-img" style="background:${p.bg_gradient || 'linear-gradient(135deg,#1e1b4b,#4c1d95)'}">
+          <span style="position:relative;z-index:1">${p.emoji || '\u{1F3B5}'}</span>
+        </div>
+        <div class="feat-body">
+          <div>
+            <div class="feat-tag">${pct < 100 ? '\u{1F7E2} Open for investment' : '\u2705 Fully funded'}</div>
+            <div class="feat-title">${esc(p.title)}</div>
+            <div class="feat-creator">${esc(p.creator_name)} \u00B7 ${esc(p.category)} \u00B7 ${esc(p.location || p.creator_location || '')}</div>
+            <div class="feat-meta">
+              <div><div class="meta-lbl">Amount needed</div><div class="meta-val">\u20A6${fmt(p.amount_needed)}</div></div>
+              <div><div class="meta-lbl">Return</div><div class="meta-val">${p.return_percentage > 0 ? p.return_percentage + '% rev share' : 'Brand visibility'}</div></div>
+              <div><div class="meta-lbl">Timeline</div><div class="meta-val">${esc(p.return_timeline || 'TBD')}</div></div>
+            </div>
+            <div class="prog-bar" style="max-width:300px"><div class="prog-fill" style="width:${pct}%"></div></div>
+            <div class="prog-txt">\u20A6${fmt(p.amount_raised)} raised \u00B7 ${pct}% funded</div>
+          </div>
+          <button class="btn-invest" onclick="event.stopPropagation();openInvest('${p.id}')">Invest in This Project \u2192</button>
+        </div>
+      </div>`;
+  }
+
+  // Grid
+  grid.innerHTML = list.map(p => {
+    const pct = p.amount_needed > 0 ? Math.round((p.amount_raised / p.amount_needed) * 100) : 0;
+    const statusClass = pct >= 100 ? '' : pct > 0 ? 'status-partial' : 'status-open';
+    const statusText = pct >= 100 ? 'Funded' : pct > 0 ? pct + '% funded' : 'Open';
+    return `
+      <div class="proj-card" data-cat="${p.category}" onclick="openDetail('${p.id}')">
+        <div class="proj-img" style="background:${p.bg_gradient || 'var(--surface)'}">${p.emoji || ''}</div>
+        <div class="proj-body">
+          <div class="proj-cat"><span class="badge badge-${p.category}">${esc(p.category)}</span></div>
+          <div class="proj-title">${esc(p.title)}</div>
+          <div class="proj-creator">${esc(p.creator_name)} \u00B7 ${esc(p.creator_location || '')}</div>
+          <div class="proj-hr"></div>
+          <div class="proj-amount">\u20A6${fmt(p.amount_needed)}</div>
+          <div class="proj-return">${p.return_percentage > 0 ? p.return_percentage + '% revenue share' : 'Brand visibility'} \u00B7 ${esc(p.return_timeline || '')}</div>
+          <div class="proj-foot">
+            <div class="status ${statusClass}"><div class="dot"></div> ${statusText}</div>
+            <button class="invest-pill" onclick="event.stopPropagation();openInvest('${p.id}')">Invest \u2192</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function filterCat(cat, btn) {
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderProjects(cat);
+}
+
+function searchProjects(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('.proj-card').forEach(c => {
+    const text = c.textContent.toLowerCase();
+    c.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PROJECT DETAIL
+// ═══════════════════════════════════════════════════════════════════════════════
+function openDetail(id) {
+  const p = projects.find(x => x.id === id);
+  if (!p) return;
+  const pct = p.amount_needed > 0 ? Math.round((p.amount_raised / p.amount_needed) * 100) : 0;
+  document.getElementById('detailContent').innerHTML = `
+    <button class="modal-x" onclick="closeModal('detailModal')">&#10005;</button>
+    <div class="detail-thumb" style="background:${p.bg_gradient || 'var(--surface)'}">${p.emoji || ''}</div>
+    <span class="badge badge-${p.category}" style="margin-bottom:12px;display:inline-block">${esc(p.category)}</span>
+    <div class="detail-title">${esc(p.title)}</div>
+    <div class="detail-creator">by ${esc(p.creator_name)} \u00B7 ${esc(p.creator_location || '')}</div>
+    ${p.description ? '<div class="detail-desc">' + esc(p.description) + '</div>' : ''}
+    <div class="detail-stats">
+      <div class="detail-stat"><div class="ds-val">\u20A6${fmt(p.amount_needed)}</div><div class="ds-lbl">Goal</div></div>
+      <div class="detail-stat"><div class="ds-val">\u20A6${fmt(p.amount_raised)}</div><div class="ds-lbl">Raised</div></div>
+      <div class="detail-stat"><div class="ds-val">${pct}%</div><div class="ds-lbl">Funded</div></div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">${p.return_percentage > 0 ? p.return_percentage + '% revenue share' : 'Brand visibility / content rights'} \u00B7 ${esc(p.return_timeline || '')}</div>
+    ${p.budget_breakdown ? '<div style="font-size:13px;color:var(--muted);margin-bottom:16px"><strong style="color:var(--text)">Budget:</strong> ' + esc(p.budget_breakdown) + '</div>' : ''}
+    <div class="invest-section">
+      <h3>Invest in this project</h3>
+      <div class="invest-row">
+        <div class="form-field">
+          <label>Amount (\u20A6)</label>
+          <input type="number" id="investAmt_${p.id}" placeholder="Min \u20A65,000" min="5000">
+        </div>
+        <button class="btn-invest" onclick="doInvest('${p.id}')">Pay with Paystack \u2192</button>
+      </div>
+    </div>`;
+  document.getElementById('detailModal').classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INVEST (PAYSTACK)
+// ═══════════════════════════════════════════════════════════════════════════════
+function openInvest(id) {
+  if (!currentUser) { openAuth('signin'); return; }
+  openDetail(id);
+  setTimeout(() => {
+    const input = document.getElementById('investAmt_' + id);
+    if (input) input.focus();
+  }, 200);
+}
+
+async function doInvest(projectId) {
+  if (!currentUser) { openAuth('signin'); return; }
+  const p = projects.find(x => x.id === projectId);
+  if (!p) return;
+  const input = document.getElementById('investAmt_' + projectId);
+  const amount = parseInt(input?.value);
+  if (!amount || amount < 5000) { toast('Minimum investment is \u20A65,000', 'error'); return; }
+
+  const remaining = p.amount_needed - p.amount_raised;
+  if (amount > remaining && remaining > 0) { toast('Maximum remaining is \u20A6' + fmt(remaining), 'error'); return; }
+
+  if (PAYSTACK_KEY.includes('REPLACE')) {
+    toast('Paystack key not configured yet. Contact admin.', 'error');
+    return;
+  }
+
+  const handler = PaystackPop.setup({
+    key: PAYSTACK_KEY,
+    email: currentUser.email,
+    amount: amount * 100,
+    currency: 'NGN',
+    ref: 'BH_INV_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+    metadata: { project_id: projectId, project_title: p.title, investor_id: currentUser.id },
+    callback: async function(response) {
+      // Save investment
+      const { error: invErr } = await db.from('bh_investments').insert({
+        investor_id: currentUser.id,
+        project_id: projectId,
+        amount: amount,
+        status: 'confirmed'
+      });
+      if (invErr) { toast('Payment received but save failed. Contact support with ref: ' + response.reference, 'error'); return; }
+
+      // Update raised amount
+      await db.rpc('increment_raised', { proj_id: projectId, amt: amount }).catch(() => {
+        // Fallback: direct update
+        db.from('bh_projects').update({ amount_raised: p.amount_raised + amount }).eq('id', projectId);
+      });
+
+      p.amount_raised += amount;
+      toast('\u2705 Investment of \u20A6' + fmt(amount) + ' confirmed!', 'success');
+      closeModal('detailModal');
+      renderProjects();
+    },
+    onClose: function() {}
+  });
+  handler.openIframe();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SUBMIT PROJECT
+// ═══════════════════════════════════════════════════════════════════════════════
+async function submitProject() {
+  if (!currentUser) { openAuth('signin'); return; }
+  const errEl = document.getElementById('submitErr');
+  errEl.style.display = 'none';
+  const title = document.getElementById('subTitle').value.trim();
+  const cat = document.getElementById('subCat').value;
+  const desc = document.getElementById('subDesc').value.trim();
+  const amount = parseInt(document.getElementById('subAmount').value);
+  const budget = document.getElementById('subBudget').value.trim();
+  const retType = document.getElementById('subReturn').value;
+  const retPct = parseFloat(document.getElementById('subRetPct').value) || 0;
+  const timeline = document.getElementById('subTimeline').value.trim();
+  const link = document.getElementById('subLink').value.trim();
+
+  if (!title || !amount) { errEl.textContent = 'Please fill in at least title and amount.'; errEl.style.display = 'block'; return; }
+
+  const btn = document.getElementById('subBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  const emojis = { music: '\u{1F3B5}', film: '\u{1F3AC}', fashion: '\u{1F457}', visual: '\u{1F3A8}', photo: '\u{1F4F8}', content: '\u{1F4F1}' };
+  const grads = { music: 'linear-gradient(135deg,#1e1b4b,#4c1d95)', film: 'linear-gradient(135deg,#022c22,#065f46)', fashion: 'linear-gradient(135deg,#4a044e,#86198f)', visual: 'linear-gradient(135deg,#431407,#9a3412)', photo: 'linear-gradient(135deg,#0c1445,#1e3a8a)', content: 'linear-gradient(135deg,#042f2e,#134e4a)' };
+
+  const { error } = await db.from('bh_projects').insert({
+    creator_id: currentUser.id,
+    creator_name: currentProfile?.name || 'Anonymous',
+    creator_email: currentUser.email,
+    title, category: cat, description: desc,
+    amount_needed: amount, amount_raised: 0,
+    budget_breakdown: budget,
+    return_type: retType, return_percentage: retPct, return_timeline: timeline,
+    creator_instagram: link,
+    status: 'active',
+    emoji: emojis[cat] || '\u{1F3B5}',
+    bg_gradient: grads[cat] || grads.music
+  });
+
+  btn.disabled = false;
+  btn.textContent = 'Submit Application \u2192';
+
+  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+
+  toast('\u2705 Project submitted successfully!', 'success');
+  closeModal('submitModal');
+  await loadProjects();
+  renderProjects();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// APPLY TO PERFORM
+// ═══════════════════════════════════════════════════════════════════════════════
+async function submitPerform() {
+  const errEl = document.getElementById('perfErr');
+  const okEl = document.getElementById('perfOk');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+  const name = document.getElementById('perfName').value.trim();
+  const email = document.getElementById('perfEmail').value.trim();
+  const appType = document.getElementById('perfType').value;
+  const cat = document.getElementById('perfCat').value.trim();
+  const bio = document.getElementById('perfBio').value.trim();
+  const link = document.getElementById('perfLink').value.trim();
+
+  if (!name || !email) { errEl.textContent = 'Name and email are required.'; errEl.style.display = 'block'; return; }
+
+  const { error } = await db.from('bh_event_applications').insert({ name, email, app_type: appType, category: cat, bio, social_link: link });
+  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+
+  okEl.textContent = '\u2705 Application submitted! We\'ll be in touch.';
+  okEl.style.display = 'block';
+  ['perfName','perfEmail','perfCat','perfBio','perfLink'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// BRAND INQUIRY
+// ═══════════════════════════════════════════════════════════════════════════════
+async function submitBrand() {
+  const errEl = document.getElementById('brandErr');
+  const okEl = document.getElementById('brandOk');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+  const company = document.getElementById('brCompany').value.trim();
+  const contact = document.getElementById('brContact').value.trim();
+  const email = document.getElementById('brEmail').value.trim();
+  const service = document.getElementById('brService').value;
+  const msg = document.getElementById('brMsg').value.trim();
+
+  if (!company || !email) { errEl.textContent = 'Company name and email are required.'; errEl.style.display = 'block'; return; }
+
+  const { error } = await db.from('bh_brand_inquiries').insert({ company_name: company, contact_name: contact, email, service_type: service, message: msg });
+  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+
+  okEl.textContent = '\u2705 Inquiry sent! We\'ll reach out within 48 hours.';
+  okEl.style.display = 'block';
+  ['brCompany','brContact','brEmail','brMsg'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// VIEWS & HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+function setView(view) {
+  ['marketplace','events','brands'].forEach(v => {
+    document.getElementById(v+'-view').classList.add('hidden');
+    const nl = document.getElementById('nl-'+v);
+    if (nl) nl.classList.remove('active');
+  });
+  document.getElementById(view+'-view').classList.remove('hidden');
+  document.getElementById(view+'-view').classList.add('fade-in');
+  const nl = document.getElementById('nl-'+view);
+  if (nl) nl.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type || '');
+  setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function fmt(n) { return (n || 0).toLocaleString('en-NG'); }
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+// Close modals on overlay click
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('overlay')) e.target.classList.add('hidden');
+  if (!e.target.closest('.avatar') && !e.target.closest('.avatar-menu')) {
+    document.getElementById('avatarMenu')?.classList.remove('show');
+  }
+});
+</script>
 </body>
 </html>
