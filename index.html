@@ -941,26 +941,26 @@ async function doInvest(projectId) {
       currency: 'NGN',
       ref: 'BH_INV_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
       metadata: { project_id: projectId, project_title: p.title, investor_id: currentUser.id },
-      callback: async function(response) {
-        // Save investment
-        const { error: invErr } = await db.from('bh_investments').insert({
-          investor_id: currentUser.id,
-          project_id: projectId,
-          amount: amount,
-          status: 'confirmed'
-        });
-        if (invErr) { toast('Payment received but save failed. Contact support with ref: ' + response.reference, 'error'); return; }
+      callback: function(response) {
+        // Paystack v1 rejects async callbacks — run async work in an IIFE
+        (async function() {
+          const { error: invErr } = await db.from('bh_investments').insert({
+            investor_id: currentUser.id,
+            project_id: projectId,
+            amount: amount,
+            status: 'confirmed'
+          });
+          if (invErr) { toast('Payment received but save failed. Contact support with ref: ' + response.reference, 'error'); return; }
 
-        // Update raised amount
-        await db.rpc('increment_raised', { proj_id: projectId, amt: amount }).catch(async () => {
-          // Fallback: direct update
-          await db.from('bh_projects').update({ amount_raised: p.amount_raised + amount }).eq('id', projectId);
-        });
+          await db.rpc('increment_raised', { proj_id: projectId, amt: amount }).catch(async () => {
+            await db.from('bh_projects').update({ amount_raised: p.amount_raised + amount }).eq('id', projectId);
+          });
 
-        p.amount_raised += amount;
-        toast('\u2705 Investment of \u20A6' + fmt(amount) + ' confirmed!', 'success');
-        closeModal('detailModal');
-        renderProjects();
+          p.amount_raised += amount;
+          toast('\u2705 Investment of \u20A6' + fmt(amount) + ' confirmed!', 'success');
+          closeModal('detailModal');
+          renderProjects();
+        })();
       },
       onClose: function() {}
     });
