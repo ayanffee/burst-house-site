@@ -1,5 +1,5 @@
-<!-- v2 — fully functional -->
 <!DOCTYPE html>
+<!-- v2 — fully functional -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -33,7 +33,7 @@
     .landing-nav-right{display:flex;align-items:center;gap:12px}
     .landing-hero{flex:1;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:64px 56px 48px;gap:48px;max-width:1280px;margin:0 auto;width:100%}
     .hero-text h1{font-size:60px;font-weight:900;line-height:1.04;letter-spacing:-2.5px}
-    .hero-text h1.accent-line{color:var(--accent)}
+    .hero-text h1.accent-line,.hero-text p.accent-line{color:var(--accent);font-size:60px;font-weight:900;line-height:1.04;letter-spacing:-2.5px}
     .hero-sub{margin-top:22px;font-size:17px;color:var(--muted);line-height:1.65;max-width:420px}
     .hero-ctas{margin-top:36px;display:flex;gap:14px}
     .btn-lg{padding:15px 30px;font-size:15px;font-weight:700;border-radius:8px;cursor:pointer;transition:all .2s;border:none;font-family:inherit}
@@ -69,6 +69,7 @@
     .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
     .status-open{color:var(--green)}.status-open .dot{background:var(--green)}
     .status-partial{color:var(--orange)}.status-partial .dot{background:var(--orange)}
+    .status-funded{color:#60a5fa}.status-funded .dot{background:#60a5fa}
 
     .stats-bar{background:var(--surface);border-top:1px solid var(--border);padding:22px 56px;display:flex;align-items:center;justify-content:center;gap:56px}
     .stat-num{font-size:26px;font-weight:800;letter-spacing:-1px}
@@ -224,24 +225,71 @@
     @keyframes spin{to{transform:rotate(360deg)}}
 
     @media(max-width:768px){
+      /* Landing */
       .landing-nav{padding:16px 20px}
       .landing-hero{grid-template-columns:1fr;padding:32px 20px}
       .hero-text h1{font-size:36px}
+      .hero-text p.accent-line{font-size:36px}
+      .hero-sub{max-width:100%;font-size:15px}
+      .hero-ctas{flex-direction:column;gap:10px}
+      .btn-lg{width:100%}
       .hero-cards{display:none}
-      .stats-bar{flex-wrap:wrap;padding:20px;gap:20px}
+      .stats-bar{flex-wrap:wrap;padding:20px;gap:20px;justify-content:center}
+      .stats-bar>div{text-align:center}
       .stat-div{display:none}
+
+      /* Platform nav */
+      .p-nav{flex-wrap:wrap;height:auto;padding:10px 16px;gap:6px}
+      .p-nav .logo{margin-right:4px}
+      .nav-link{padding:10px 11px}
+      .p-nav-right{width:100%;margin-left:0;justify-content:flex-end;padding-top:4px}
+      .search{display:none}
+
+      /* Content & grids */
+      .p-content{padding:20px 16px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
       .grid3{grid-template-columns:1fr}
       .grid2{grid-template-columns:1fr}
-      .p-nav{padding:0 16px;flex-wrap:wrap;height:auto;padding:10px 16px;gap:6px}
-      .p-content{padding:20px}
-      .modal{width:calc(100vw - 32px);padding:28px}
-      .detail-modal,.smodal{width:calc(100vw - 32px)}
+
+      /* Filter row — horizontal scroll instead of wrapping */
+      .filter-row{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;padding-right:16px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+      .filter-row::-webkit-scrollbar{display:none}
+      .ftab{flex-shrink:0}
+
+      /* Invest pill — always visible on touch (hover doesn't work) */
+      .invest-pill{opacity:1}
+
+      /* Featured card */
       .featured-card{grid-template-columns:1fr}
       .feat-img{height:140px}
+      .feat-title{font-size:20px}
+      .feat-meta{flex-wrap:wrap;gap:14px}
+      .meta-val{font-size:15px}
+
+      /* Modals — cap height so they don't overflow screen */
+      .overlay{align-items:flex-start;padding:16px;overflow-y:auto}
+      .modal{width:calc(100vw - 32px);padding:24px 20px;max-height:90vh;overflow-y:auto}
+      .detail-modal,.smodal{width:calc(100vw - 32px);max-height:88vh}
+
+      /* Other sections */
       .brands-grid{grid-template-columns:1fr}
       .ev-stat-row{grid-template-columns:1fr}
       .detail-stats{grid-template-columns:1fr}
-      .search{display:none}
+
+      /* iOS input zoom prevention — font-size <16px triggers auto-zoom */
+      .form-field input,.form-field select,.form-field textarea{font-size:16px}
+
+      /* iPhone safe area (home indicator) */
+      body{padding-bottom:env(safe-area-inset-bottom,0px)}
+    }
+
+    /* Very small phones (iPhone SE, Galaxy A series) */
+    @media(max-width:400px){
+      .hero-text h1,.hero-text p.accent-line{font-size:28px}
+      .btn-lg{padding:13px 16px;font-size:14px}
+      .p-nav{padding:8px 12px}
+      .p-content{padding:16px 12px}
+      .feat-title{font-size:17px}
+      .landing-nav{padding:12px 16px}
     }
   </style>
 </head>
@@ -383,7 +431,7 @@
   <div class="landing-hero">
     <div class="hero-text">
       <h1>Invest in creative<br>projects.</h1>
-      <h1 class="accent-line">Get your creative<br>project funded.</h1>
+      <p class="accent-line">Get your creative<br>project funded.</p>
       <p class="hero-sub">Browse vetted projects. Commit your investment. Burst House manages every cent.</p>
       <div class="hero-ctas">
         <button class="btn-lg solid" onclick="openAuth('signup')">Browse Projects &#x2192;</button>
@@ -588,13 +636,13 @@ let selectedRole = 'investor';
 // ═══════════════════════════════════════════════════════════════════════════════
 (async function init() {
   const { data: { session } } = await db.auth.getSession();
+  await loadProjects();
+  renderProjects();
   if (session) {
     currentUser = session.user;
     await loadProfile();
     showPlatform();
   }
-  await loadProjects();
-  renderProjects();
 
   db.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session) {
@@ -602,6 +650,8 @@ let selectedRole = 'investor';
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
       currentProfile = null;
+      document.getElementById('platform').classList.add('hidden');
+      document.getElementById('landing').classList.remove('hidden');
     }
   });
 })();
@@ -768,7 +818,7 @@ function renderProjects(filter) {
   // Grid
   grid.innerHTML = list.map(p => {
     const pct = p.amount_needed > 0 ? Math.round((p.amount_raised / p.amount_needed) * 100) : 0;
-    const statusClass = pct >= 100 ? '' : pct > 0 ? 'status-partial' : 'status-open';
+    const statusClass = pct >= 100 ? 'status-funded' : pct > 0 ? 'status-partial' : 'status-open';
     const statusText = pct >= 100 ? 'Funded' : pct > 0 ? pct + '% funded' : 'Open';
     return `
       <div class="proj-card" data-cat="${p.category}" onclick="openDetail('${p.id}')">
@@ -859,7 +909,8 @@ async function doInvest(projectId) {
   if (!amount || amount < 5000) { toast('Minimum investment is \u20A65,000', 'error'); return; }
 
   const remaining = p.amount_needed - p.amount_raised;
-  if (amount > remaining && remaining > 0) { toast('Maximum remaining is \u20A6' + fmt(remaining), 'error'); return; }
+  if (remaining <= 0) { toast('This project is fully funded.', 'error'); return; }
+  if (amount > remaining) { toast('Maximum remaining is \u20A6' + fmt(remaining), 'error'); return; }
 
   if (PAYSTACK_KEY.includes('REPLACE')) {
     toast('Paystack key not configured yet. Contact admin.', 'error');
@@ -884,9 +935,9 @@ async function doInvest(projectId) {
       if (invErr) { toast('Payment received but save failed. Contact support with ref: ' + response.reference, 'error'); return; }
 
       // Update raised amount
-      await db.rpc('increment_raised', { proj_id: projectId, amt: amount }).catch(() => {
+      await db.rpc('increment_raised', { proj_id: projectId, amt: amount }).catch(async () => {
         // Fallback: direct update
-        db.from('bh_projects').update({ amount_raised: p.amount_raised + amount }).eq('id', projectId);
+        await db.from('bh_projects').update({ amount_raised: p.amount_raised + amount }).eq('id', projectId);
       });
 
       p.amount_raised += amount;
@@ -972,6 +1023,7 @@ async function submitPerform() {
   okEl.textContent = '\u2705 Application submitted! We\'ll be in touch.';
   okEl.style.display = 'block';
   ['perfName','perfEmail','perfCat','perfBio','perfLink'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('perfType').value = 'perform';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -995,6 +1047,7 @@ async function submitBrand() {
   okEl.textContent = '\u2705 Inquiry sent! We\'ll reach out within 48 hours.';
   okEl.style.display = 'block';
   ['brCompany','brContact','brEmail','brMsg'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('brService').value = 'event_sponsorship';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
