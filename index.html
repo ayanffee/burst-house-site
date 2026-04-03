@@ -928,6 +928,11 @@ async function doInvest(projectId) {
     return;
   }
 
+  if (typeof PaystackPop === 'undefined') {
+    toast('Payment system failed to load. Please refresh the page.', 'error');
+    return;
+  }
+
   try {
     const handler = PaystackPop.setup({
       key: PAYSTACK_KEY,
@@ -961,7 +966,7 @@ async function doInvest(projectId) {
     });
     handler.openIframe();
   } catch (e) {
-    toast('Could not open payment popup. Please try again.', 'error');
+    toast('Payment error: ' + (e?.message || 'Please try again.'), 'error');
   }
 }
 
