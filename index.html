@@ -917,37 +917,52 @@ async function doInvest(projectId) {
     return;
   }
 
-  const handler = PaystackPop.setup({
-    key: PAYSTACK_KEY,
-    email: currentUser.email,
-    amount: amount * 100,
-    currency: 'NGN',
-    ref: 'BH_INV_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-    metadata: { project_id: projectId, project_title: p.title, investor_id: currentUser.id },
-    callback: async function(response) {
-      // Save investment
-      const { error: invErr } = await db.from('bh_investments').insert({
-        investor_id: currentUser.id,
-        project_id: projectId,
-        amount: amount,
-        status: 'confirmed'
-      });
-      if (invErr) { toast('Payment received but save failed. Contact support with ref: ' + response.reference, 'error'); return; }
+  // currentUser.email can be null in some Supabase sessions — fetch fresh if needed
+  let payEmail = currentUser.email;
+  if (!payEmail) {
+    const { data: { user } } = await db.auth.getUser();
+    payEmail = user?.email;
+  }
+  if (!payEmail) {
+    toast('Could not retrieve your email. Please sign out and sign in again.', 'error');
+    return;
+  }
 
-      // Update raised amount
-      await db.rpc('increment_raised', { proj_id: projectId, amt: amount }).catch(async () => {
-        // Fallback: direct update
-        await db.from('bh_projects').update({ amount_raised: p.amount_raised + amount }).eq('id', projectId);
-      });
+  try {
+    const handler = PaystackPop.setup({
+      key: PAYSTACK_KEY,
+      email: payEmail,
+      amount: amount * 100,
+      currency: 'NGN',
+      ref: 'BH_INV_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      metadata: { project_id: projectId, project_title: p.title, investor_id: currentUser.id },
+      callback: async function(response) {
+        // Save investment
+        const { error: invErr } = await db.from('bh_investments').insert({
+          investor_id: currentUser.id,
+          project_id: projectId,
+          amount: amount,
+          status: 'confirmed'
+        });
+        if (invErr) { toast('Payment received but save failed. Contact support with ref: ' + response.reference, 'error'); return; }
 
-      p.amount_raised += amount;
-      toast('\u2705 Investment of \u20A6' + fmt(amount) + ' confirmed!', 'success');
-      closeModal('detailModal');
-      renderProjects();
-    },
-    onClose: function() {}
-  });
-  handler.openIframe();
+        // Update raised amount
+        await db.rpc('increment_raised', { proj_id: projectId, amt: amount }).catch(async () => {
+          // Fallback: direct update
+          await db.from('bh_projects').update({ amount_raised: p.amount_raised + amount }).eq('id', projectId);
+        });
+
+        p.amount_raised += amount;
+        toast('\u2705 Investment of \u20A6' + fmt(amount) + ' confirmed!', 'success');
+        closeModal('detailModal');
+        renderProjects();
+      },
+      onClose: function() {}
+    });
+    handler.openIframe();
+  } catch (e) {
+    toast('Could not open payment popup. Please try again.', 'error');
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
