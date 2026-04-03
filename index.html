@@ -967,7 +967,10 @@ async function submitProject() {
   const timeline = document.getElementById('subTimeline').value.trim();
   const link = document.getElementById('subLink').value.trim();
 
-  if (!title || !amount) { errEl.textContent = 'Please fill in at least title and amount.'; errEl.style.display = 'block'; return; }
+  if (!title) { errEl.textContent = 'Please enter a project title.'; errEl.style.display = 'block'; return; }
+  if (!amount || isNaN(amount) || amount <= 0) { errEl.textContent = 'Please enter a valid funding amount.'; errEl.style.display = 'block'; return; }
+  if (amount > 9999999999) { errEl.textContent = 'Amount is too large. Please enter a realistic funding goal.'; errEl.style.display = 'block'; return; }
+  if (retPct < 0 || retPct > 100) { errEl.textContent = 'Return percentage must be between 0 and 100.'; errEl.style.display = 'block'; return; }
 
   const btn = document.getElementById('subBtn');
   btn.disabled = true;
