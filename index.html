@@ -728,7 +728,7 @@ function toggleAvatarMenu() {
 // PROJECTS
 // ═══════════════════════════════════════════════════════════════════════════════
 async function loadProjects() {
-  const { data } = await db.from('bh_projects').select('*').in('status', ['live']).order('created_at', { ascending: false });
+  const { data } = await db.from('bh_projects').select('*').in('status', ['active']).order('created_at', { ascending: false });
   if (data) projects = data;
 }
 
