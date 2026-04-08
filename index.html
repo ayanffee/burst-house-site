@@ -681,6 +681,17 @@ let selectedRole = 'investor';
   await loadProjects();
   renderProjects();
 
+  // Handle shared project links e.g. thebursthouse.com/#project/ID
+  const hash = window.location.hash;
+  if (hash.startsWith('#project/')) {
+    const id = hash.replace('#project/', '');
+    const p = projects.find(x => x.id === id);
+    if (p) {
+      if (!currentUser) showPlatform(); // show platform so modal can open
+      openDetail(id);
+    }
+  }
+
   db.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session) {
       currentUser = session.user;
@@ -899,7 +910,10 @@ function openDetail(id) {
     <button class="modal-x" onclick="closeModal('detailModal')">&#10005;</button>
     <div class="detail-thumb" style="${p.image_url ? 'background:url(' + p.image_url + ') center/cover no-repeat' : 'background:' + (p.bg_gradient || 'var(--surface)')}">${p.image_url ? '' : (p.emoji || '')}</div>
     <span class="badge badge-${p.category}" style="margin-bottom:12px;display:inline-block">${esc(p.category)}</span>
-    <div class="detail-title">${esc(p.title)}</div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px">
+      <div class="detail-title" style="margin-bottom:0">${esc(p.title)}</div>
+      <button onclick="copyProjectLink('${p.id}')" style="flex-shrink:0;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:600;padding:6px 12px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">&#x1F517; Copy Link</button>
+    </div>
     <div class="detail-creator">by ${esc(p.creator_name)} \u00B7 ${esc(p.creator_location || '')}</div>
     ${p.description ? '<div class="detail-desc">' + esc(p.description) + '</div>' : ''}
     <div class="detail-stats">
@@ -1183,6 +1197,7 @@ async function loadDashboard() {
       <div class="dash-proj-actions">
         <button class="btn-sm solid" onclick="openImgEdit('${p.id}')">&#x1F5BC; Update Image</button>
         <button class="btn-sm outline" onclick="openBackers('${p.id}')">&#x1F465; View Members (${p._backerCount})</button>
+        <button class="btn-sm outline" onclick="copyProjectLink('${p.id}')">&#x1F517; Copy Share Link</button>
       </div>
     </div>`;
   }).join('');
@@ -1262,6 +1277,24 @@ async function openBackers(projectId) {
 
 function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+function copyProjectLink(projectId) {
+  const url = 'https://thebursthouse.com/#project/' + projectId;
+  navigator.clipboard.writeText(url).then(() => {
+    toast('\u2705 Link copied! Share it anywhere.', 'success');
+  }).catch(() => {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('\u2705 Link copied! Share it anywhere.', 'success');
+  });
+}
 
 function toast(msg, type) {
   const t = document.getElementById('toast');
