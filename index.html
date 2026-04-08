@@ -145,7 +145,7 @@
     .meta-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
     .meta-val{font-size:17px;font-weight:700}
     .prog-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:5px}
-    .prog-fill{height:100%;background:var(--accent);border-radius:2px}
+    .prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1)}
     .prog-txt{font-size:11px;color:var(--muted)}
     .btn-invest{background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:700;padding:11px 22px;border-radius:7px;cursor:pointer;font-family:inherit;transition:all .2s;display:inline-flex;align-items:center;gap:6px;width:fit-content}
     .btn-invest:hover{background:var(--accent-hover);transform:translateY(-1px)}
@@ -959,7 +959,7 @@ async function doInvest(projectId) {
     ref: 'BH_INV_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
     metadata: { project_id: projectId, project_title: p.title, investor_id: currentUser.id },
     callback: async function(response) {
-      // Save investment
+      // Save investment record
       const { error: invErr } = await db.from('bh_investments').insert({
         investor_id: currentUser.id,
         project_id: projectId,
@@ -968,13 +968,16 @@ async function doInvest(projectId) {
       });
       if (invErr) { toast('Payment received but save failed. Contact support with ref: ' + response.reference, 'error'); return; }
 
-      // Update raised amount
-      await db.rpc('increment_raised', { proj_id: projectId, amt: amount }).catch(() => {
-        // Fallback: direct update
-        db.from('bh_projects').update({ amount_raised: p.amount_raised + amount }).eq('id', projectId);
-      });
+      // Update raised amount in DB — try RPC first, then direct update
+      const newRaised = p.amount_raised + amount;
+      const { error: rpcErr } = await db.rpc('increment_raised', { proj_id: projectId, amt: amount });
+      if (rpcErr) {
+        await db.from('bh_projects').update({ amount_raised: newRaised }).eq('id', projectId);
+      }
 
-      p.amount_raised += amount;
+      // Reload from DB so progress bar reflects the real value
+      await loadProjects();
+
       toast('\u2705 Payment of \u20A6' + fmt(amount) + ' confirmed! Welcome to the community.', 'success');
       closeModal('detailModal');
       renderProjects();
