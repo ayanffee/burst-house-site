@@ -728,7 +728,7 @@ function toggleAvatarMenu() {
 // PROJECTS
 // ═══════════════════════════════════════════════════════════════════════════════
 async function loadProjects() {
-  const { data } = await db.from('bh_projects').select('*').in('status', ['active','closed']).order('created_at', { ascending: false });
+  const { data } = await db.from('bh_projects').select('*').in('status', ['live']).order('created_at', { ascending: false });
   if (data) projects = data;
 }
 
@@ -934,7 +934,7 @@ async function submitProject() {
     budget_breakdown: budget,
     return_type: retType, return_percentage: retPct, return_timeline: timeline,
     creator_instagram: link,
-    status: 'active',
+    status: 'pending',
     emoji: emojis[cat] || '\u{1F3B5}',
     bg_gradient: grads[cat] || grads.music
   });
@@ -944,7 +944,7 @@ async function submitProject() {
 
   if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
 
-  toast('\u2705 Project submitted successfully!', 'success');
+  toast('\u2705 Project submitted! We\u2019ll review and get back to you within 7 days.', 'success');
   closeModal('submitModal');
   await loadProjects();
   renderProjects();
