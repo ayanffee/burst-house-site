@@ -747,7 +747,7 @@ let selectedRole = 'investor';
     const hash = window.location.hash;
     if (hash.startsWith('#project/')) {
       const id = hash.replace('#project/', '');
-      const p = projects.find(x => x.id === id);
+      const p = projects.find(x => x.id === id || x.id.startsWith(id));
       if (p) {
         if (!currentUser) showPlatform();
         openDetail(id);
@@ -1056,7 +1056,7 @@ function openDetail(id) {
     trapFocus(modal);
   }, 60);
   // Update URL hash for shareable link
-  if (history.replaceState) history.replaceState(null, '', '#project/' + p.id);
+  if (history.replaceState) history.replaceState(null, '', '#project/' + p.id.substring(0, 8));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -1430,7 +1430,7 @@ function closeAvatarMenu() {
 }
 
 function copyProjectLink(projectId) {
-  const url = window.location.origin + window.location.pathname + '#project/' + projectId;
+  const url = window.location.origin + window.location.pathname + '#project/' + projectId.substring(0, 8);
   navigator.clipboard.writeText(url).then(() => {
     toast('\u2705 Link copied! Share it anywhere.', 'success');
   }).catch(() => {

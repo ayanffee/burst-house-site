@@ -972,7 +972,7 @@ function openDetail(id) {
     if (x) x.focus();
     trapFocus(modal);
   }, 60);
-  if (history.replaceState) history.replaceState(null, '', '#project/' + p.id);
+  if (history.replaceState) history.replaceState(null, '', '#project/' + p.id.substring(0, 8));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
