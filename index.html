@@ -5,7 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Burst House — Creative Community</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://js.paystack.co/v1/inline.js"></script>
   <style>
@@ -268,17 +270,56 @@
       .grid3{grid-template-columns:1fr}
       .grid2{grid-template-columns:1fr}
       .dash-grid{grid-template-columns:1fr}
-      .p-nav{padding:0 16px;flex-wrap:wrap;height:auto;padding:10px 16px;gap:6px}
-      .p-content{padding:20px}
-      .modal{width:calc(100vw - 32px);padding:28px}
-      .detail-modal,.smodal{width:calc(100vw - 32px)}
+      .p-nav{padding:0 16px;overflow-x:auto;height:auto;padding:0 12px;gap:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap}
+      .p-nav::-webkit-scrollbar{display:none}
+      .p-nav .logo{flex-shrink:0;margin-right:10px}
+      .nav-link{padding:18px 10px;font-size:13px;white-space:nowrap;flex-shrink:0}
+      .p-nav-right{gap:6px;flex-shrink:0}
+      .btn-sub{font-size:12px;padding:6px 10px}
+      .p-content{padding:16px}
+      .modal{width:calc(100vw - 24px);padding:22px}
+      .detail-modal,.smodal{width:calc(100vw - 24px)}
       .featured-card{grid-template-columns:1fr}
       .feat-img{height:140px}
+      .feat-body{padding:18px}
+      .feat-title{font-size:20px}
+      .feat-meta{flex-wrap:wrap;gap:14px}
       .brands-grid{grid-template-columns:1fr}
       .ev-stat-row{grid-template-columns:1fr}
       .detail-stats{grid-template-columns:1fr}
+      .filter-row{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px;margin-bottom:16px}
+      .filter-row::-webkit-scrollbar{display:none}
+      .ftab{flex-shrink:0;padding:8px 14px;min-height:38px}
       .search{display:none}
+      .search-toggle{display:flex}
+      .search.mobile-show{display:flex;position:absolute;top:10px;left:16px;right:60px;z-index:10;width:auto}
+      input,select,textarea{font-size:16px!important}
+      .avatar{width:36px;height:36px}
+      .proj-card{border-radius:10px}
+      .feat-tag{font-size:9px}
     }
+    @media(max-width:400px){
+      .hero-text h1{font-size:30px}
+      .feat-title{font-size:18px}
+      .p-content{padding:12px}
+    }
+    /* ── Accessibility & UX improvements ── */
+    body.modal-open{overflow:hidden}
+    button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+    .no-results{color:var(--muted);font-size:14px;padding:48px 20px;text-align:center;width:100%;grid-column:1/-1}
+    .no-results svg{display:block;margin:0 auto 12px;opacity:.3}
+    .search-toggle{display:none;background:none;border:none;color:var(--muted);padding:7px;cursor:pointer;border-radius:6px;align-items:center;justify-content:center;flex-shrink:0}
+    .search-toggle:hover{color:var(--text)}
+    .modal-x{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+    /* Confirmation modal */
+    .confirm-modal{text-align:center}
+    .confirm-icon{font-size:52px;margin-bottom:14px;display:block}
+    .confirm-amount{font-size:40px;font-weight:900;color:var(--green);letter-spacing:-1.5px;margin-bottom:4px}
+    .confirm-project{font-size:15px;font-weight:600;margin-bottom:6px}
+    .confirm-ref{font-size:11px;color:var(--dim);margin-bottom:20px;font-family:monospace;letter-spacing:.3px}
+    .confirm-desc{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+    /* Muted text fix for contrast */
+    --muted:#9a9a9a;
   </style>
 </head>
 <body>
@@ -289,15 +330,15 @@
 <!-- ═══ AUTH MODAL ═══ -->
 <div class="overlay hidden" id="authModal">
   <div class="modal fade-in">
-    <button class="modal-x" onclick="closeAuth()">&#10005;</button>
+    <button class="modal-x" onclick="closeAuth()" aria-label="Close dialog">&#10005;</button>
     <h2 id="authTitle">Join Burst House</h2>
     <p class="modal-sub" id="authSub">Create your account to access community benefits.</p>
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tabSignup" onclick="switchAuthTab('signup')">Sign Up</button>
-      <button class="auth-tab" id="tabSignin" onclick="switchAuthTab('signin')">Sign In</button>
+    <div class="auth-tabs" role="tablist">
+      <button class="auth-tab active" id="tabSignup" onclick="switchAuthTab('signup')" role="tab" aria-selected="true">Sign Up</button>
+      <button class="auth-tab" id="tabSignin" onclick="switchAuthTab('signin')" role="tab" aria-selected="false">Sign In</button>
     </div>
-    <div class="err-msg" id="authErr"></div>
-    <div class="ok-msg" id="authOk"></div>
+    <div class="err-msg" id="authErr" role="alert" aria-live="assertive"></div>
+    <div class="ok-msg" id="authOk" role="status" aria-live="polite"></div>
     <!-- signup fields -->
     <div id="signupFields">
       <div class="choice-row">
@@ -329,10 +370,10 @@
 <!-- ═══ SUBMIT PROJECT MODAL ═══ -->
 <div class="overlay hidden" id="submitModal">
   <div class="modal smodal fade-in">
-    <button class="modal-x" onclick="closeModal('submitModal')">&#10005;</button>
+    <button class="modal-x" onclick="closeModal('submitModal')" aria-label="Close dialog">&#10005;</button>
     <h2>List Your Project</h2>
     <p class="modal-sub">Tell us what you're making. We review every application within 7 days.</p>
-    <div class="err-msg" id="submitErr"></div>
+    <div class="err-msg" id="submitErr" role="alert" aria-live="assertive"></div>
     <div class="form-field">
       <label>Project Image</label>
       <div id="imgPreviewWrap" style="display:none;margin-bottom:8px"><img id="imgPreview" style="width:100%;height:140px;object-fit:cover;border-radius:8px"></div>
@@ -368,11 +409,11 @@
 <!-- ═══ APPLY TO PERFORM MODAL ═══ -->
 <div class="overlay hidden" id="performModal">
   <div class="modal smodal fade-in">
-    <button class="modal-x" onclick="closeModal('performModal')">&#10005;</button>
+    <button class="modal-x" onclick="closeModal('performModal')" aria-label="Close dialog">&#10005;</button>
     <h2>Apply to Perform</h2>
     <p class="modal-sub">Show us what you've got. Free to apply, free to perform.</p>
-    <div class="err-msg" id="perfErr"></div>
-    <div class="ok-msg" id="perfOk"></div>
+    <div class="err-msg" id="perfErr" role="alert" aria-live="assertive"></div>
+    <div class="ok-msg" id="perfOk" role="status" aria-live="polite"></div>
     <div class="form-field"><label>Full Name</label><input type="text" id="perfName" placeholder="Your name"></div>
     <div class="form-field"><label>Email</label><input type="email" id="perfEmail" placeholder="you@email.com"></div>
     <div class="form-field"><label>I want to</label>
@@ -392,11 +433,11 @@
 <!-- ═══ BRAND INQUIRY MODAL ═══ -->
 <div class="overlay hidden" id="brandModal">
   <div class="modal smodal fade-in">
-    <button class="modal-x" onclick="closeModal('brandModal')">&#10005;</button>
+    <button class="modal-x" onclick="closeModal('brandModal')" aria-label="Close dialog">&#10005;</button>
     <h2>Partner With Us</h2>
     <p class="modal-sub">Tell us about your brand. We'll build something that works.</p>
-    <div class="err-msg" id="brandErr"></div>
-    <div class="ok-msg" id="brandOk"></div>
+    <div class="err-msg" id="brandErr" role="alert" aria-live="assertive"></div>
+    <div class="ok-msg" id="brandOk" role="status" aria-live="polite"></div>
     <div class="form-field"><label>Company / Brand Name</label><input type="text" id="brCompany" placeholder="Your brand name"></div>
     <div class="form-field"><label>Contact Name</label><input type="text" id="brContact" placeholder="Your name"></div>
     <div class="form-field"><label>Email</label><input type="email" id="brEmail" placeholder="you@company.com"></div>
@@ -484,16 +525,19 @@
     <button class="nav-link" id="nl-brands" onclick="setView('brands')">For Brands</button>
     <button class="nav-link" id="nl-dashboard" onclick="setView('dashboard')">My Dashboard</button>
     <div class="p-nav-right">
-      <div class="search">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" placeholder="Search projects..." oninput="searchProjects(this.value)">
+      <button class="search-toggle" onclick="toggleMobileSearch()" aria-label="Toggle search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <div class="search" id="searchBox" role="search">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search projects..." oninput="searchProjects(this.value)" aria-label="Search projects">
       </div>
       <button class="btn-sub" onclick="openModal('submitModal')">+ List Project</button>
-      <div class="avatar" id="userAvatar" onclick="toggleAvatarMenu()">A
-        <div class="avatar-menu" id="avatarMenu">
-          <button id="menuName" style="color:var(--text);font-weight:700;cursor:default">User</button>
-          <button onclick="setView('dashboard');document.getElementById('avatarMenu').classList.remove('show')">My Dashboard</button>
-          <button onclick="signOut()">Sign out</button>
+      <div class="avatar" id="userAvatar" onclick="toggleAvatarMenu()" role="button" tabindex="0" aria-label="Account menu" aria-haspopup="true" aria-expanded="false">A
+        <div class="avatar-menu" id="avatarMenu" role="menu">
+          <button id="menuName" style="color:var(--text);font-weight:700;cursor:default" role="menuitem" aria-disabled="true">User</button>
+          <button onclick="setView('dashboard');closeAvatarMenu()" role="menuitem">My Dashboard</button>
+          <button onclick="signOut()" role="menuitem">Sign out</button>
         </div>
       </div>
     </div>
@@ -503,16 +547,20 @@
     <!-- MARKETPLACE VIEW -->
     <div id="marketplace-view" class="fade-in">
       <div id="featuredArea"></div>
-      <div class="filter-row">
-        <button class="ftab active" onclick="filterCat('all',this)">All Projects</button>
-        <button class="ftab" onclick="filterCat('music',this)">&#x1F3B5; Music</button>
-        <button class="ftab" onclick="filterCat('film',this)">&#x1F3AC; Film</button>
-        <button class="ftab" onclick="filterCat('fashion',this)">&#x1F457; Fashion</button>
-        <button class="ftab" onclick="filterCat('visual',this)">&#x1F3A8; Visual Art</button>
-        <button class="ftab" onclick="filterCat('photo',this)">&#x1F4F8; Photography</button>
+      <div class="filter-row" role="tablist" aria-label="Filter projects by category">
+        <button class="ftab active" onclick="filterCat('all',this)" role="tab" aria-selected="true">All Projects</button>
+        <button class="ftab" onclick="filterCat('music',this)" role="tab" aria-selected="false">&#x1F3B5; Music</button>
+        <button class="ftab" onclick="filterCat('film',this)" role="tab" aria-selected="false">&#x1F3AC; Film</button>
+        <button class="ftab" onclick="filterCat('fashion',this)" role="tab" aria-selected="false">&#x1F457; Fashion</button>
+        <button class="ftab" onclick="filterCat('visual',this)" role="tab" aria-selected="false">&#x1F3A8; Visual Art</button>
+        <button class="ftab" onclick="filterCat('photo',this)" role="tab" aria-selected="false">&#x1F4F8; Photography</button>
       </div>
       <div class="sec-label">Community Cards &amp; Projects</div>
       <div class="grid3" id="projGrid"></div>
+      <div id="noResults" class="no-results" style="display:none" aria-live="polite">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        No projects match your search.
+      </div>
 
       <!-- Events subsection -->
       <div class="events-sep">
@@ -603,6 +651,8 @@
         <p style="color:var(--muted);margin-bottom:24px">Tell us about your brand. We'll build something that works.</p>
         <button class="btn-lg solid" onclick="openModal('brandModal')">Fill The Form &#x2192;</button>
       </div>
+    </div>
+
     <!-- DASHBOARD VIEW -->
     <div id="dashboard-view" class="hidden fade-in">
       <div style="margin-bottom:28px">
@@ -616,15 +666,13 @@
       <div class="sec-label" style="margin-bottom:16px">Your Projects</div>
       <div id="dashProjects"><div style="color:var(--muted);font-size:14px">Loading...</div></div>
     </div>
-
-    </div>
   </div>
 </div>
 
 <!-- IMAGE EDIT MODAL -->
 <div class="overlay hidden" id="imgEditModal">
   <div class="modal fade-in" style="width:420px">
-    <button class="modal-x" onclick="closeModal('imgEditModal')">&#10005;</button>
+    <button class="modal-x" onclick="closeModal('imgEditModal')" aria-label="Close dialog">&#10005;</button>
     <h2 style="font-size:20px;margin-bottom:6px">Update Cover Image</h2>
     <p class="modal-sub" id="imgEditProjectTitle"></p>
     <div class="img-upload-zone" id="imgEditZone">
@@ -639,10 +687,23 @@
   </div>
 </div>
 
+<!-- INVESTMENT CONFIRMATION MODAL -->
+<div class="overlay hidden" id="confirmModal">
+  <div class="modal fade-in confirm-modal">
+    <button class="modal-x" onclick="closeModal('confirmModal')" aria-label="Close dialog">&#10005;</button>
+    <span class="confirm-icon" aria-hidden="true">&#x1F389;</span>
+    <div class="confirm-amount" id="confirmAmount"></div>
+    <div class="confirm-project" id="confirmProject"></div>
+    <div class="confirm-ref" id="confirmRef"></div>
+    <div class="confirm-desc" id="confirmDesc"></div>
+    <button class="btn-full" onclick="closeModal('confirmModal')">Done &#x2713;</button>
+  </div>
+</div>
+
 <!-- BACKERS MODAL -->
 <div class="overlay hidden" id="backersModal">
   <div class="modal smodal fade-in">
-    <button class="modal-x" onclick="closeModal('backersModal')">&#10005;</button>
+    <button class="modal-x" onclick="closeModal('backersModal')" aria-label="Close dialog">&#10005;</button>
     <h2 style="font-size:20px;margin-bottom:4px">Community Members</h2>
     <p class="modal-sub" id="backersProjectTitle"></p>
     <div id="backersContent"></div>
@@ -672,29 +733,44 @@ let selectedRole = 'investor';
 // INIT
 // ═══════════════════════════════════════════════════════════════════════════════
 (async function init() {
-  const { data: { session } } = await db.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    await loadProfile();
-    showPlatform();
-  }
-  await loadProjects();
-  renderProjects();
-
-  // Handle shared project links e.g. thebursthouse.com/#project/ID
-  const hash = window.location.hash;
-  if (hash.startsWith('#project/')) {
-    const id = hash.replace('#project/', '');
-    const p = projects.find(x => x.id === id);
-    if (p) {
-      if (!currentUser) showPlatform(); // show platform so modal can open
-      openDetail(id);
-    }
-  }
-
-  db.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session) {
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    if (session) {
       currentUser = session.user;
+      await loadProfile();
+      showPlatform();
+    }
+    await loadProjects();
+    renderProjects();
+
+    // Handle shared project links e.g. thebursthouse.com/#project/ID
+    const hash = window.location.hash;
+    if (hash.startsWith('#project/')) {
+      const id = hash.replace('#project/', '');
+      const p = projects.find(x => x.id === id);
+      if (p) {
+        if (!currentUser) showPlatform();
+        openDetail(id);
+      }
+    }
+  } catch(e) {
+    console.error('Init error:', e);
+    // Still try to load projects even if auth check failed
+    try { await loadProjects(); renderProjects(); } catch(_) {}
+  }
+
+  db.auth.onAuthStateChange(async (event, session) => {
+    if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+      currentUser = session.user;
+      // If platform isn't visible yet (session arrived after init, e.g. token refresh)
+      if (!currentProfile) {
+        await loadProfile();
+        showPlatform();
+        if (!projects.length) {
+          await loadProjects();
+        }
+        renderProjects();
+      }
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
       currentProfile = null;
@@ -708,24 +784,35 @@ let selectedRole = 'investor';
 function openAuth(mode) {
   authMode = mode || 'signup';
   switchAuthTab(authMode);
-  document.getElementById('authModal').classList.remove('hidden');
+  const el = document.getElementById('authModal');
+  el.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+  setTimeout(() => {
+    const f = el.querySelector('input,button:not(.modal-x)');
+    if (f) f.focus();
+    trapFocus(el);
+  }, 60);
 }
 function closeAuth() {
   document.getElementById('authModal').classList.add('hidden');
   document.getElementById('authErr').style.display = 'none';
   document.getElementById('authOk').style.display = 'none';
+  if (!document.querySelector('.overlay:not(.hidden)')) document.body.classList.remove('modal-open');
 }
 function switchAuthTab(mode) {
   authMode = mode;
-  document.getElementById('tabSignup').classList.toggle('active', mode === 'signup');
-  document.getElementById('tabSignin').classList.toggle('active', mode === 'signin');
-  document.getElementById('signupFields').classList.toggle('hidden', mode === 'signin');
-  document.getElementById('authBtn').textContent = mode === 'signup' ? 'Create Account \u2192' : 'Sign In \u2192';
-  document.getElementById('authTitle').textContent = mode === 'signup' ? 'Join Burst House' : 'Welcome Back';
-  document.getElementById('authSub').textContent = mode === 'signup' ? 'Create your account to access community benefits.' : 'Sign in to your account.';
-  document.getElementById('authFoot').innerHTML = mode === 'signup'
-    ? 'Already have an account? <a onclick="switchAuthTab(\'signin\')">Sign in</a>'
-    : 'New here? <a onclick="switchAuthTab(\'signup\')">Create account</a>';
+  const signup = mode === 'signup';
+  document.getElementById('tabSignup').classList.toggle('active', signup);
+  document.getElementById('tabSignup').setAttribute('aria-selected', signup ? 'true' : 'false');
+  document.getElementById('tabSignin').classList.toggle('active', !signup);
+  document.getElementById('tabSignin').setAttribute('aria-selected', !signup ? 'true' : 'false');
+  document.getElementById('signupFields').classList.toggle('hidden', !signup);
+  document.getElementById('authBtn').textContent = signup ? 'Create Account \u2192' : 'Sign In \u2192';
+  document.getElementById('authTitle').textContent = signup ? 'Join Burst House' : 'Welcome Back';
+  document.getElementById('authSub').textContent = signup ? 'Create your account to access community benefits.' : 'Sign in to your account.';
+  document.getElementById('authFoot').innerHTML = signup
+    ? 'Already have an account? <a onclick="switchAuthTab(\'signin\')" style="color:var(--accent);cursor:pointer">Sign in</a>'
+    : 'New here? <a onclick="switchAuthTab(\'signup\')" style="color:var(--accent);cursor:pointer">Create account</a>';
   document.getElementById('authErr').style.display = 'none';
   document.getElementById('authOk').style.display = 'none';
 }
@@ -803,7 +890,7 @@ async function signOut() {
   currentProfile = null;
   document.getElementById('platform').classList.add('hidden');
   document.getElementById('landing').classList.remove('hidden');
-  document.getElementById('avatarMenu').classList.remove('show');
+  closeAvatarMenu();
 }
 
 function showPlatform() {
@@ -817,7 +904,9 @@ function showPlatform() {
 }
 
 function toggleAvatarMenu() {
-  document.getElementById('avatarMenu').classList.toggle('show');
+  const menu = document.getElementById('avatarMenu');
+  const expanded = menu.classList.toggle('show');
+  document.getElementById('userAvatar').setAttribute('aria-expanded', expanded ? 'true' : 'false');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -862,13 +951,22 @@ function renderProjects(filter) {
   }
 
   // Grid
+  if (!list.length) {
+    grid.innerHTML = '';
+    const noRes = document.getElementById('noResults');
+    if (noRes) { noRes.textContent = 'No projects in this category yet.'; noRes.style.display = 'block'; }
+    return;
+  }
+  const noRes = document.getElementById('noResults');
+  if (noRes) noRes.style.display = 'none';
+
   grid.innerHTML = list.map(p => {
     const pct = p.amount_needed > 0 ? Math.round((p.amount_raised / p.amount_needed) * 100) : 0;
     const statusClass = pct >= 100 ? '' : pct > 0 ? 'status-partial' : 'status-open';
     const statusText = pct >= 100 ? 'Claimed' : pct > 0 ? pct + '% claimed' : 'Available';
     return `
-      <div class="proj-card" data-cat="${p.category}" onclick="openDetail('${p.id}')">
-        <div class="proj-img" style="${p.image_url ? 'background:url(' + p.image_url + ') center/cover no-repeat' : 'background:' + (p.bg_gradient || 'var(--surface)')}">${p.image_url ? '' : (p.emoji || '')}</div>
+      <div class="proj-card" data-id="${p.id}" data-cat="${p.category}" onclick="openDetail('${p.id}')" role="button" tabindex="0" aria-label="View ${esc(p.title)}">
+        <div class="proj-img" style="${p.image_url ? 'background:url(' + p.image_url + ') center/cover no-repeat' : 'background:' + (p.bg_gradient || 'var(--surface)')}" role="img" aria-label="${esc(p.category)} project image">${p.image_url ? '' : (p.emoji || '')}</div>
         <div class="proj-body">
           <div class="proj-cat"><span class="badge badge-${p.category}">${esc(p.category)}</span></div>
           <div class="proj-title">${esc(p.title)}</div>
@@ -877,26 +975,41 @@ function renderProjects(filter) {
           <div class="proj-amount">\u20A6${fmt(p.amount_needed)}</div>
           <div class="proj-return">Community benefits \u00B7 ${esc(p.return_timeline || '')}</div>
           <div class="proj-foot">
-            <div class="status ${statusClass}"><div class="dot"></div> ${statusText}</div>
+            <div class="status ${statusClass}"><div class="dot" aria-hidden="true"></div> <span>${statusText}</span></div>
             <button class="invest-pill" onclick="event.stopPropagation();openInvest('${p.id}')">Get \u2192</button>
           </div>
         </div>
       </div>`;
   }).join('');
+
+  // Keyboard support for project cards
+  grid.querySelectorAll('.proj-card').forEach(card => {
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(card.dataset.id); }
+    });
+  });
 }
 
 function filterCat(cat, btn) {
-  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ftab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
   btn.classList.add('active');
+  btn.setAttribute('aria-selected', 'true');
   renderProjects(cat);
 }
 
 function searchProjects(q) {
-  q = q.toLowerCase();
+  q = q.toLowerCase().trim();
+  let visible = 0;
   document.querySelectorAll('.proj-card').forEach(c => {
-    const text = c.textContent.toLowerCase();
-    c.style.display = text.includes(q) ? '' : 'none';
+    const match = !q || c.textContent.toLowerCase().includes(q);
+    c.style.display = match ? '' : 'none';
+    if (match) visible++;
   });
+  const noRes = document.getElementById('noResults');
+  if (noRes) noRes.style.display = (q && visible === 0) ? 'block' : 'none';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -907,8 +1020,8 @@ function openDetail(id) {
   if (!p) return;
   const pct = p.amount_needed > 0 ? Math.round((p.amount_raised / p.amount_needed) * 100) : 0;
   document.getElementById('detailContent').innerHTML = `
-    <button class="modal-x" onclick="closeModal('detailModal')">&#10005;</button>
-    <div class="detail-thumb" style="${p.image_url ? 'background:url(' + p.image_url + ') center/cover no-repeat' : 'background:' + (p.bg_gradient || 'var(--surface)')}">${p.image_url ? '' : (p.emoji || '')}</div>
+    <button class="modal-x" onclick="closeModal('detailModal')" aria-label="Close dialog">&#10005;</button>
+    <div class="detail-thumb" style="${p.image_url ? 'background:url(' + p.image_url + ') center/cover no-repeat' : 'background:' + (p.bg_gradient || 'var(--surface)')}" role="img" aria-label="${esc(p.title)} cover image">${p.image_url ? '' : (p.emoji || '')}</div>
     <span class="badge badge-${p.category}" style="margin-bottom:12px;display:inline-block">${esc(p.category)}</span>
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px">
       <div class="detail-title" style="margin-bottom:0">${esc(p.title)}</div>
@@ -934,7 +1047,16 @@ function openDetail(id) {
         <button class="btn-invest" onclick="doInvest('${p.id}')">Pay with Paystack \u2192</button>
       </div>
     </div>`;
-  document.getElementById('detailModal').classList.remove('hidden');
+  const modal = document.getElementById('detailModal');
+  modal.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+  setTimeout(() => {
+    const x = modal.querySelector('.modal-x');
+    if (x) x.focus();
+    trapFocus(modal);
+  }, 60);
+  // Update URL hash for shareable link
+  if (history.replaceState) history.replaceState(null, '', '#project/' + p.id);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -978,23 +1100,30 @@ async function doInvest(projectId) {
         investor_id: currentUser.id,
         project_id: projectId,
         amount: amount,
-        status: 'confirmed'
+        status: 'confirmed',
+        paystack_ref: response.reference
       });
-      if (invErr) { toast('Payment received but save failed. Contact support with ref: ' + response.reference, 'error'); return; }
-
-      // Update raised amount in DB — try RPC first, then direct update
-      const newRaised = p.amount_raised + amount;
-      const { error: rpcErr } = await db.rpc('increment_raised', { proj_id: projectId, amt: amount });
-      if (rpcErr) {
-        await db.from('bh_projects').update({ amount_raised: newRaised }).eq('id', projectId);
+      if (invErr) {
+        toast('Payment received but save failed. Contact support with ref: ' + response.reference, 'error');
+        return;
       }
 
-      // Reload from DB so progress bar reflects the real value
-      await loadProjects();
+      // Update raised amount — try RPC first, fallback to direct update
+      const newRaised = p.amount_raised + amount;
+      const { error: rpcErr } = await db.rpc('increment_raised', { proj_id: projectId, amt: amount });
+      if (rpcErr) await db.from('bh_projects').update({ amount_raised: newRaised }).eq('id', projectId);
 
-      toast('\u2705 Payment of \u20A6' + fmt(amount) + ' confirmed! Welcome to the community.', 'success');
+      // Reload projects so progress bar is accurate
+      await loadProjects();
       closeModal('detailModal');
       renderProjects();
+
+      // Show confirmation receipt
+      document.getElementById('confirmAmount').textContent = '\u20A6' + fmt(amount);
+      document.getElementById('confirmProject').textContent = 'Payment confirmed for \u201C' + p.title + '\u201D';
+      document.getElementById('confirmRef').textContent = 'Ref: ' + response.reference;
+      document.getElementById('confirmDesc').textContent = 'You now have community access. Keep this reference for your records.';
+      openModal('confirmModal');
     },
     onClose: function() {}
   });
@@ -1155,12 +1284,16 @@ async function loadDashboard() {
     .order('created_at', { ascending: false });
   myProjects = data || [];
 
-  // Stats
+  // Stats — single query instead of N+1 loop
   let totalBackers = 0;
-  for (const p of myProjects) {
-    const { count } = await db.from('bh_investments').select('*', { count: 'exact', head: true }).eq('project_id', p.id);
-    p._backerCount = count || 0;
-    totalBackers += p._backerCount;
+  if (myProjects.length > 0) {
+    const { data: backerRows } = await db
+      .from('bh_investments')
+      .select('project_id')
+      .in('project_id', myProjects.map(p => p.id));
+    const backerMap = {};
+    (backerRows || []).forEach(r => { backerMap[r.project_id] = (backerMap[r.project_id] || 0) + 1; });
+    myProjects.forEach(p => { p._backerCount = backerMap[p.id] || 0; totalBackers += p._backerCount; });
   }
   document.getElementById('dsTotalProjects').textContent = myProjects.length;
   document.getElementById('dsTotalBackers').textContent = totalBackers;
@@ -1275,24 +1408,39 @@ async function openBackers(projectId) {
     </table>`;
 }
 
-function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function openModal(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+  setTimeout(() => {
+    const f = el.querySelector('.modal-x');
+    if (f) f.focus();
+    trapFocus(el);
+  }, 60);
+}
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+  if (!document.querySelector('.overlay:not(.hidden)')) document.body.classList.remove('modal-open');
+  if (id === 'detailModal' && history.replaceState) history.replaceState(null, '', window.location.pathname);
+}
+
+function closeAvatarMenu() {
+  document.getElementById('avatarMenu').classList.remove('show');
+  document.getElementById('userAvatar').setAttribute('aria-expanded', 'false');
+}
 
 function copyProjectLink(projectId) {
-  const url = 'https://thebursthouse.com/#project/' + projectId;
+  const url = window.location.origin + window.location.pathname + '#project/' + projectId;
   navigator.clipboard.writeText(url).then(() => {
     toast('\u2705 Link copied! Share it anywhere.', 'success');
   }).catch(() => {
-    // Fallback for older browsers
     const ta = document.createElement('textarea');
     ta.value = url;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
+    ta.style.cssText = 'position:fixed;opacity:0';
     document.body.appendChild(ta);
     ta.select();
-    document.execCommand('copy');
+    try { document.execCommand('copy'); toast('\u2705 Link copied!', 'success'); } catch(_) { toast('Could not copy link.', 'error'); }
     document.body.removeChild(ta);
-    toast('\u2705 Link copied! Share it anywhere.', 'success');
   });
 }
 
@@ -1300,19 +1448,55 @@ function toast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast ' + (type || '');
+  t.style.cursor = 'pointer';
+  clearTimeout(t._timer);
   setTimeout(() => t.classList.add('show'), 10);
-  setTimeout(() => t.classList.remove('show'), 3500);
+  t._timer = setTimeout(() => t.classList.remove('show'), 4000);
+  t.onclick = () => t.classList.remove('show');
 }
 
 function fmt(n) { return (n || 0).toLocaleString('en-NG'); }
 function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 
-// Close modals on overlay click
-document.addEventListener('click', e => {
-  if (e.target.classList.contains('overlay')) e.target.classList.add('hidden');
-  if (!e.target.closest('.avatar') && !e.target.closest('.avatar-menu')) {
-    document.getElementById('avatarMenu')?.classList.remove('show');
+function toggleMobileSearch() {
+  const box = document.getElementById('searchBox');
+  const open = box.classList.toggle('mobile-show');
+  if (open) box.querySelector('input').focus();
+  else { box.querySelector('input').value = ''; searchProjects(''); }
+}
+
+function trapFocus(container) {
+  const sel = 'button:not([disabled]):not([aria-disabled="true"]),input:not([disabled]),select:not([disabled]),textarea:not([disabled])';
+  function getItems() { return [...container.querySelectorAll(sel)].filter(n => !n.closest('.hidden')); }
+  function handler(e) {
+    if (e.key !== 'Tab') return;
+    if (container.classList.contains('hidden')) { container.removeEventListener('keydown', handler); return; }
+    const items = getItems();
+    if (!items.length) return;
+    if (e.shiftKey) { if (document.activeElement === items[0]) { items[items.length-1].focus(); e.preventDefault(); } }
+    else { if (document.activeElement === items[items.length-1]) { items[0].focus(); e.preventDefault(); } }
   }
+  container.addEventListener('keydown', handler);
+}
+
+// ── Global event listeners ──
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('overlay')) {
+    e.target.classList.add('hidden');
+    if (!document.querySelector('.overlay:not(.hidden)')) document.body.classList.remove('modal-open');
+  }
+  if (!e.target.closest('.avatar') && !e.target.closest('[id="avatarMenu"]')) closeAvatarMenu();
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const open = document.querySelector('.overlay:not(.hidden)');
+  if (!open) return;
+  if (open.id === 'authModal') closeAuth();
+  else closeModal(open.id);
+});
+document.addEventListener('DOMContentLoaded', () => {
+  const av = document.getElementById('userAvatar');
+  if (av) av.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); toggleAvatarMenu(); } });
 });
 </script>
 </body>
