@@ -702,6 +702,22 @@
   </div>
 </div>
 
+<!-- EDIT DETAILS MODAL -->
+<div class="overlay hidden" id="descEditModal">
+  <div class="modal fade-in" style="width:480px">
+    <button class="modal-x" onclick="closeModal('descEditModal')" aria-label="Close dialog">&#10005;</button>
+    <h2 style="font-size:20px;margin-bottom:4px">Edit Project Details</h2>
+    <p class="modal-sub" style="margin-bottom:20px">Changes go live immediately.</p>
+    <div class="err-msg" id="descEditErr" role="alert"></div>
+    <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Project Title</label>
+    <input id="descEditTitle" type="text" maxlength="80" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:15px;font-weight:600;padding:10px 13px;border-radius:8px;font-family:inherit;outline:none;margin-bottom:16px" placeholder="Project title">
+    <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Description</label>
+    <textarea id="descEditBody" rows="6" maxlength="1000" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:14px;padding:10px 13px;border-radius:8px;font-family:inherit;outline:none;resize:vertical;line-height:1.6" placeholder="Tell people about your project — what it is, what the community gets, why it matters..."></textarea>
+    <div style="font-size:11px;color:var(--dim);text-align:right;margin-top:4px;margin-bottom:16px"><span id="descCharCount">0</span>/1000</div>
+    <button class="btn-full" id="descEditBtn" onclick="saveProjectDesc()">Save Changes &#x2192;</button>
+  </div>
+</div>
+
 <!-- BACKERS MODAL -->
 <div class="overlay hidden" id="backersModal">
   <div class="modal smodal fade-in">
@@ -1333,6 +1349,7 @@ async function loadDashboard() {
       </div>
       <div class="dash-proj-actions">
         <button class="btn-sm solid" onclick="openImgEdit('${p.id}')">&#x1F5BC; Update Image</button>
+        <button class="btn-sm outline" onclick="openDescEdit('${p.id}')">&#x270F;&#xFE0F; Edit Details</button>
         <button class="btn-sm outline" onclick="openBackers('${p.id}')">&#x1F465; View Members (${p._backerCount})</button>
         <button class="btn-sm outline" onclick="copyProjectLink('${p.id}')">&#x1F517; Copy Share Link</button>
       </div>
@@ -1452,6 +1469,48 @@ function previewEditImg(input) {
     initCropDrag();
   };
   img.src = URL.createObjectURL(file);
+}
+
+function openDescEdit(projectId) {
+  editingProjectId = projectId;
+  const p = myProjects.find(x => x.id === projectId);
+  document.getElementById('descEditTitle').value = p?.title || '';
+  document.getElementById('descEditBody').value = p?.description || '';
+  document.getElementById('descCharCount').textContent = (p?.description || '').length;
+  document.getElementById('descEditErr').style.display = 'none';
+  openModal('descEditModal');
+  // Live character counter
+  document.getElementById('descEditBody').oninput = function() {
+    document.getElementById('descCharCount').textContent = this.value.length;
+  };
+}
+
+async function saveProjectDesc() {
+  const title = document.getElementById('descEditTitle').value.trim();
+  const description = document.getElementById('descEditBody').value.trim();
+  const errEl = document.getElementById('descEditErr');
+  errEl.style.display = 'none';
+  if (!title) { errEl.textContent = 'Title cannot be empty.'; errEl.style.display = 'block'; return; }
+  const btn = document.getElementById('descEditBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+  try {
+    const { error } = await db.from('bh_projects')
+      .update({ title, description })
+      .eq('id', editingProjectId)
+      .eq('creator_id', currentUser.id);
+    if (error) throw new Error(error.message);
+    toast('\u2705 Details updated!', 'success');
+    closeModal('descEditModal');
+    await loadProjects();
+    loadDashboard();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save Changes \u2192';
+  }
 }
 
 async function saveProjectImage() {
