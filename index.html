@@ -867,14 +867,18 @@ async function handleAuth() {
     const name = document.getElementById('authName').value.trim();
     if (!name) { showAuthErr('Please enter your name.'); btn.disabled = false; btn.textContent = 'Create Account \u2192'; return; }
 
-    const { data, error } = await db.auth.signUp({ email, password: pass });
+    const { data, error } = await db.auth.signUp({
+      email, password: pass,
+      options: { data: { name, role: selectedRole } }
+    });
     if (error) { showAuthErr(error.message); btn.disabled = false; btn.textContent = 'Create Account \u2192'; return; }
 
     if (data.user) {
       currentUser = data.user;
-      // Create profile
-      await db.from('bh_profiles').upsert({ id: data.user.id, name, role: selectedRole });
+      // Upsert profile — safe if a trigger already created it
+      const { error: profErr } = await db.from('bh_profiles').upsert({ id: data.user.id, name, role: selectedRole }, { onConflict: 'id' });
       currentProfile = { id: data.user.id, name, role: selectedRole };
+      if (profErr) console.warn('Profile upsert:', profErr.message);
 
       // If session exists, go straight in
       if (data.session) {
