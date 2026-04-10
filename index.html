@@ -679,7 +679,11 @@
       <input type="file" id="imgEditFile" accept="image/*" onchange="previewEditImg(this)">
     </div>
     <div id="imgEditPreviewWrap" style="display:none;margin-top:12px">
-      <img id="imgEditPreview" style="width:100%;height:160px;object-fit:cover;border-radius:10px">
+      <p style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:6px">Drag to reposition &middot; scroll or pinch to zoom</p>
+      <div id="cropViewport" style="width:100%;height:210px;overflow:hidden;border-radius:10px;background:#111;position:relative;cursor:grab;touch-action:none;user-select:none">
+        <img id="cropImage" draggable="false" style="position:absolute;max-width:none;will-change:transform">
+      </div>
+      <button onclick="document.getElementById('imgEditFile').click()" style="width:100%;margin-top:8px;background:none;border:1px solid var(--border);color:var(--muted);font-size:12px;padding:7px;border-radius:6px;cursor:pointer;font-family:inherit;transition:color .15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Choose different image</button>
     </div>
     <button class="btn-full" id="imgEditBtn" onclick="saveProjectImage()" style="margin-top:16px">Save Image &#x2192;</button>
   </div>
@@ -1336,20 +1340,118 @@ async function loadDashboard() {
   }).join('');
 }
 
+// Crop state: tracks image position, scale, and viewport dimensions
+let cropState = { x: 0, y: 0, scale: 1, baseW: 0, baseH: 0, natW: 0, natH: 0, vpW: 0, vpH: 0 };
+let cropDrag = { active: false, startX: 0, startY: 0, lastDist: 0 };
+
+function clampCrop() {
+  const w = cropState.baseW * cropState.scale;
+  const h = cropState.baseH * cropState.scale;
+  cropState.x = Math.min(0, Math.max(cropState.x, cropState.vpW - w));
+  cropState.y = Math.min(0, Math.max(cropState.y, cropState.vpH - h));
+}
+
+function applyCrop() {
+  const img = document.getElementById('cropImage');
+  const w = cropState.baseW * cropState.scale;
+  const h = cropState.baseH * cropState.scale;
+  img.style.width = w + 'px';
+  img.style.height = h + 'px';
+  img.style.left = cropState.x + 'px';
+  img.style.top = cropState.y + 'px';
+}
+
+function initCropDrag() {
+  const vp = document.getElementById('cropViewport');
+
+  // Mouse drag
+  vp.onmousedown = (e) => {
+    cropDrag.active = true;
+    cropDrag.startX = e.clientX - cropState.x;
+    cropDrag.startY = e.clientY - cropState.y;
+    vp.style.cursor = 'grabbing';
+    e.preventDefault();
+  };
+  document.onmousemove = (e) => {
+    if (!cropDrag.active) return;
+    cropState.x = e.clientX - cropDrag.startX;
+    cropState.y = e.clientY - cropDrag.startY;
+    clampCrop(); applyCrop();
+  };
+  document.onmouseup = () => { cropDrag.active = false; vp.style.cursor = 'grab'; };
+
+  // Scroll to zoom
+  vp.onwheel = (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.07 : 0.07;
+    const oldScale = cropState.scale;
+    cropState.scale = Math.max(1, Math.min(4, cropState.scale + delta));
+    const ratio = cropState.scale / oldScale;
+    const cx = cropState.vpW / 2, cy = cropState.vpH / 2;
+    cropState.x = cx - (cx - cropState.x) * ratio;
+    cropState.y = cy - (cy - cropState.y) * ratio;
+    clampCrop(); applyCrop();
+  };
+
+  // Touch: drag + pinch to zoom
+  vp.ontouchstart = (e) => {
+    if (e.touches.length === 1) {
+      cropDrag.active = true;
+      cropDrag.startX = e.touches[0].clientX - cropState.x;
+      cropDrag.startY = e.touches[0].clientY - cropState.y;
+    } else if (e.touches.length === 2) {
+      cropDrag.active = false;
+      cropDrag.lastDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    }
+    e.preventDefault();
+  };
+  vp.ontouchmove = (e) => {
+    if (e.touches.length === 1 && cropDrag.active) {
+      cropState.x = e.touches[0].clientX - cropDrag.startX;
+      cropState.y = e.touches[0].clientY - cropDrag.startY;
+    } else if (e.touches.length === 2) {
+      const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      const oldScale = cropState.scale;
+      cropState.scale = Math.max(1, Math.min(4, cropState.scale * (dist / cropDrag.lastDist)));
+      cropDrag.lastDist = dist;
+      const cx = cropState.vpW / 2, cy = cropState.vpH / 2;
+      cropState.x = cx - (cx - cropState.x) * (cropState.scale / oldScale);
+      cropState.y = cy - (cy - cropState.y) * (cropState.scale / oldScale);
+    }
+    clampCrop(); applyCrop();
+    e.preventDefault();
+  };
+  vp.ontouchend = () => { cropDrag.active = false; };
+}
+
 function openImgEdit(projectId) {
   editingProjectId = projectId;
   const p = myProjects.find(x => x.id === projectId);
   document.getElementById('imgEditProjectTitle').textContent = p?.title || '';
   document.getElementById('imgEditFile').value = '';
   document.getElementById('imgEditPreviewWrap').style.display = 'none';
+  document.getElementById('imgEditZone').style.display = 'block';
   openModal('imgEditModal');
 }
 
 function previewEditImg(input) {
   const file = input.files[0];
   if (!file) return;
-  document.getElementById('imgEditPreview').src = URL.createObjectURL(file);
+  const vp = document.getElementById('cropViewport');
+  const img = document.getElementById('cropImage');
+  document.getElementById('imgEditZone').style.display = 'none';
   document.getElementById('imgEditPreviewWrap').style.display = 'block';
+  img.onload = () => {
+    const vpW = vp.offsetWidth, vpH = vp.offsetHeight;
+    const imgAspect = img.naturalWidth / img.naturalHeight;
+    const vpAspect = vpW / vpH;
+    const baseW = imgAspect > vpAspect ? vpH * imgAspect : vpW;
+    const baseH = imgAspect > vpAspect ? vpH : vpW / imgAspect;
+    cropState = { x: (vpW - baseW) / 2, y: (vpH - baseH) / 2, scale: 1, baseW, baseH, natW: img.naturalWidth, natH: img.naturalHeight, vpW, vpH };
+    applyCrop();
+    initCropDrag();
+  };
+  img.src = URL.createObjectURL(file);
 }
 
 async function saveProjectImage() {
@@ -1358,24 +1460,39 @@ async function saveProjectImage() {
   const btn = document.getElementById('imgEditBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>';
+  try {
+    // Render the cropped region onto a canvas and export as JPEG
+    const cropImg = document.getElementById('cropImage');
+    const outW = 1200, outH = Math.round(1200 * cropState.vpH / cropState.vpW);
+    const canvas = document.createElement('canvas');
+    canvas.width = outW; canvas.height = outH;
+    const displayW = cropState.baseW * cropState.scale;
+    const displayH = cropState.baseH * cropState.scale;
+    const sx = (-cropState.x / displayW) * cropState.natW;
+    const sy = (-cropState.y / displayH) * cropState.natH;
+    const sw = (cropState.vpW / displayW) * cropState.natW;
+    const sh = (cropState.vpH / displayH) * cropState.natH;
+    canvas.getContext('2d').drawImage(cropImg, sx, sy, sw, sh, 0, 0, outW, outH);
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.88));
 
-  const ext = file.name.split('.').pop();
-  const path = `projects/${currentUser.id}_${editingProjectId}.${ext}`;
-  const { error: upErr } = await db.storage.from('project-images').upload(path, file, { upsert: true });
-  if (upErr) { toast('Upload failed: ' + upErr.message, 'error'); btn.disabled = false; btn.textContent = 'Save Image \u2192'; return; }
+    const path = `projects/${currentUser.id}_${editingProjectId}.jpg`;
+    const { error: upErr } = await db.storage.from('project-images').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
+    if (upErr) throw new Error(upErr.message);
 
-  const { data: urlData } = db.storage.from('project-images').getPublicUrl(path);
-  const imageUrl = urlData?.publicUrl;
+    const { data: urlData } = db.storage.from('project-images').getPublicUrl(path);
+    const { error: dbErr } = await db.from('bh_projects').update({ image_url: urlData?.publicUrl }).eq('id', editingProjectId).eq('creator_id', currentUser.id);
+    if (dbErr) throw new Error(dbErr.message);
 
-  const { error: dbErr } = await db.from('bh_projects').update({ image_url: imageUrl }).eq('id', editingProjectId).eq('creator_id', currentUser.id);
-  btn.disabled = false;
-  btn.textContent = 'Save Image \u2192';
-  if (dbErr) { toast('Saved image but failed to update record: ' + dbErr.message, 'error'); return; }
-
-  toast('\u2705 Image updated!', 'success');
-  closeModal('imgEditModal');
-  await loadProjects();
-  loadDashboard();
+    toast('\u2705 Image updated!', 'success');
+    closeModal('imgEditModal');
+    await loadProjects();
+    loadDashboard();
+  } catch (err) {
+    toast('Failed: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save Image \u2192';
+  }
 }
 
 async function openBackers(projectId) {
